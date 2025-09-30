@@ -234,3 +234,46 @@ document.addEventListener('DOMContentLoaded', function() {
     </script>
 </body>
 </html>
+function downloadTable() {
+    const table = document.getElementById('mainTable');
+    const tableName = document.getElementById('tableName').value || 'МояТаблица';
+    
+    if (!table.rows.length) {
+        alert('Сначала создайте таблицу!');
+        return;
+    }
+    
+    let csvData = [];
+    
+    // Собираем все строки таблицы
+    for (let i = 0; i < table.rows.length; i++) {
+        let rowData = [];
+        const cells = table.rows[i].cells;
+        
+        for (let j = 0; j < cells.length; j++) {
+            let cellValue = cells[j].textContent || '';
+            cellValue = cellValue.replace(/"/g, '""');
+            
+            // Все значения обрамляем в кавычки для надежности
+            cellValue = '"' + cellValue + '"';
+            
+            rowData.push(cellValue);
+        }
+        csvData.push(rowData.join(';')); // Используем точку с запятой для лучшей совместимости
+    }
+    
+    // Добавляем BOM для правильного отображения кириллицы в Excel
+    const BOM = '\uFEFF';
+    const csvContent = BOM + csvData.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.href = url;
+    link.download = tableName + '.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    alert('Таблица "' + tableName + '" успешно сохранена!');
+}
