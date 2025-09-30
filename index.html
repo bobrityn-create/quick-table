@@ -112,50 +112,50 @@
 
     <script>
         function createTable() {
-            var columns = parseInt(document.getElementById('columns').value) || 3;
-            var rows = parseInt(document.getElementById('rows').value) || 3;
-            var table = document.getElementById('editableTable');
-            var columnNamesInput = document.getElementById('columnNames').value;
-            var rowNamesInput = document.getElementById('rowNames').value;
-table.innerHTML = '';
+            var a = parseInt(document.getElementById('columns').value) || 3;
+            var b = parseInt(document.getElementById('rows').value) || 3;
+            var t = document.getElementById('editableTable');
+            var c = document.getElementById('columnNames').value;
+            var r = document.getElementById('rowNames').value;
+t.innerHTML = '';
             
-            var columnNames = [];
-            if (columnNamesInput) {
-                var names = columnNamesInput.split(',');
-                for (var i = 0; i < names.length; i++) {
-                    columnNames.push(names[i].trim());
+            var cn = [];
+            if (c) {
+                var n = c.split(',');
+                for (var i = 0; i < n.length; i++) {
+                    cn.push(n[i].trim());
                 }
             }
             
-            var rowNames = [];
-            if (rowNamesInput) {
-                var names = rowNamesInput.split(',');
-                for (var i = 0; i < names.length; i++) {
-                    rowNames.push(names[i].trim());
+            var rn = [];
+            if (r) {
+                var n = r.split(',');
+                for (var i = 0; i < n.length; i++) {
+                    rn.push(n[i].trim());
                 }
             }
             
-            var headerRow = table.insertRow();
-            var emptyHeader = document.createElement('th');
-            emptyHeader.textContent = '';
-            headerRow.appendChild(emptyHeader);
+            var hr = t.insertRow();
+            var eh = document.createElement('th');
+            eh.textContent = '';
+            hr.appendChild(eh);
             
-            for (var i = 0; i < columns; i++) {
+            for (var i = 0; i < a; i++) {
                 var th = document.createElement('th');
-                th.textContent = columnNames[i] || 'Колонка ' + (i + 1);
+                th.textContent = cn[i] || 'Колонка ' + (i + 1);
                 th.contentEditable = true;
                 th.className = 'column-header';
-                headerRow.appendChild(th);
+                hr.appendChild(th);
             }
             
-            for (var i = 0; i < rows; i++) {
-                var row = table.insertRow();
-                var rowHeader = row.insertCell();
-                rowHeader.textContent = rowNames[i] || 'Строка ' + (i + 1);
-                rowHeader.contentEditable = true;
-                rowHeader.className = 'row-header';
+            for (var i = 0; i < b; i++) {
+                var row = t.insertRow();
+                var rh = row.insertCell();
+                rh.textContent = rn[i] || 'Строка ' + (i + 1);
+                rh.contentEditable = true;
+                rh.className = 'row-header';
                 
-                for (var j = 0; j < columns; j++) {
+                for (var j = 0; j < a; j++) {
                     var cell = row.insertCell();
                     cell.contentEditable = true;
                     cell.textContent = '';
@@ -165,42 +165,42 @@ table.innerHTML = '';
         }
 
         function exportToExcel() {
-            var table = document.getElementById('editableTable');
-            var tableTitle = document.getElementById('tableTitle').value || 'Таблица';
+            var t = document.getElementById('editableTable');
+            var tt = document.getElementById('tableTitle').value || 'Таблица';
             
-            if (!table.rows.length) {
+            if (!t.rows.length) {
                 alert('Таблица пустая!');
                 return;
             }
             
             var csv = [];
-            csv.push([tableTitle]);
+            csv.push([tt]);
             csv.push([]);
             
-            for (var i = 0; i < table.rows.length; i++) {
+            for (var i = 0; i < t.rows.length; i++) {
                 var row = [];
-                var cells = table.rows[i].cells;
+                var cells = t.rows[i].cells;
                 
                 for (var j = 0; j < cells.length; j++) {
-                    var v = cells[j].textContent;
-                    v = v.replace(/"/g, '""');
+                    var x = cells[j].textContent;
+                    x = x.replace(/"/g, '""');
                     
-                    if (v.indexOf(',') >= 0  v.indexOf('\n') >= 0) {
-                        v = '"' + v + '"';
+                    if (x.indexOf(',') >= 0  x.indexOf('\n') >= 0) {
+                        x = '"' + x + '"';
                     }
                     
-                    row.push(v);
+                    row.push(x);
                 }
                 csv.push(row.join(','));
             }
             
-            var csvContent = csv.join('\n');
-            var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            var content = csv.join('\n');
+            var blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
             var link = document.createElement('a');
             var url = URL.createObjectURL(blob);
             
             link.setAttribute('href', url);
-            link.setAttribute('download', tableTitle + '.csv');
+            link.setAttribute('download', tt + '.csv');
             
             document.body.appendChild(link);
             link.click();
@@ -219,7 +219,8 @@ table.innerHTML = '';
                 document.getElementById('rows').value = '3';
             }
         }
-document.addEventListener('DOMContentLoaded', function() {
+
+        document.addEventListener('DOMContentLoaded', function() {
             createTable();
             document.getElementById('createBtn').addEventListener('click', createTable);
             document.getElementById('exportBtn').addEventListener('click', exportToExcel);
