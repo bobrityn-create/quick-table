@@ -277,3 +277,274 @@ function downloadTable() {
     
     alert('Таблица "' + tableName + '" успешно сохранена!');
 }
+    <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Базовые стили для мобильных устройств */
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 15px;
+    font-size: 14px;
+}
+
+.app-container {
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.app-header {
+    text-align: center;
+    margin-bottom: 20px;
+    color: white;
+}
+
+.app-title {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    word-wrap: break-word;
+}
+
+.app-subtitle {
+    font-size: 1rem;
+    opacity: 0.9;
+    line-height: 1.4;
+}
+
+.control-panel {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.input-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.input-card {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 12px;
+    border: 2px solid transparent;
+}
+
+.input-label {
+    display: block;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 16px; /* Увеличиваем для удобства на мобильных */
+}
+
+.button-group {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.action-btn {
+    padding: 15px 20px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.table-container {
+    background: white;
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
+}
+
+#editableTable {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 500px; /* Минимальная ширина для таблицы */
+}
+
+#editableTable th,
+#editableTable td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.column-header {
+    background: #2196F3;
+    color: white;
+    font-weight: 600;
+    min-width: 80px;
+}
+
+.row-header {
+    background: #4CAF50;
+    color: white;
+    font-weight: 600;
+    min-width: 80px;
+}
+
+.data-cell {
+    background: #f9f9f9;
+    min-width: 80px;
+}
+
+/* Стили для планшетов (768px и выше) */
+@media (min-width: 768px) {
+    body {
+        padding: 20px;
+        font-size: 16px;
+    }
+    
+    .app-title {
+        font-size: 2.5rem;
+    }
+    
+    .app-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .input-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+    
+    .button-group {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+    }
+    
+    .action-btn {
+        padding: 18px 25px;
+    }
+    
+    .control-panel {
+        padding: 30px;
+    }
+    
+    .table-container {
+        padding: 20px;
+    }
+}
+
+/* Стили для десктопов (1024px и выше) */
+@media (min-width: 1024px) {
+    .app-container {
+        max-width: 1200px;
+    }
+    
+    .input-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    #editableTable th,
+    #editableTable td {
+        padding: 12px;
+        font-size: 16px;
+    }
+}
+
+/* Стили для очень больших экранов (1440px и выше) */
+@media (min-width: 1440px) {
+    .app-container {
+        max-width: 1400px;
+    }
+    
+    .input-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+/* Дополнительные улучшения для мобильных */
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+    
+    .app-title {
+        font-size: 1.5rem;
+    }
+    
+    .control-panel {
+padding: 15px;
+    }
+    
+    .input-card {
+        padding: 12px;
+    }
+    
+    .form-control {
+        padding: 10px 12px;
+    }
+    
+    .action-btn {
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+    
+    #editableTable th,
+    #editableTable td {
+        padding: 8px;
+        font-size: 12px;
+    }
+}
+
+/* Улучшение скролла на мобильных */
+.table-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Предотвращение масштабирования при фокусе на мобильных */
+.form-control {
+    font-size: 16px; /* Предотвращает зум в iOS */
+}
+
+/* Улучшение касаний на мобильных */
+button, input, .data-cell {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+</style>
