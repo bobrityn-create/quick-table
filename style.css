@@ -1,4 +1,3 @@
-> Fertyni:
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -120,8 +119,6 @@
             
             var cols = parseInt(col.value) || 3;
             var rows = parseInt(row.value) || 3;
-
-> Fertyni:
 var colText = colNames.value;
             var rowText = rowNames.value;
             
@@ -185,6 +182,7 @@ var colText = colNames.value;
             var data = [];
             data.push([tableName]);
             data.push([]);
+            
             for (var i = 0; i < table.rows.length; i++) {
                 var line = [];
                 var cells = table.rows[i].cells;
@@ -193,7 +191,7 @@ var colText = colNames.value;
                     var text = cells[j].textContent;
                     text = text.replace(/"/g, '""');
                     
-                    if (text.indexOf(',') >= 0 ⠟⠺⠞⠵⠟⠺⠟⠞⠞⠺⠟⠵⠞⠺⠵⠟⠞⠟⠵⠺⠺⠺⠞⠺ text.indexOf('\n') >= 0) {
+                    if (text.indexOf(',') >= 0  text.indexOf('\n') >= 0) {
                         text = '"' + text + '"';
                     }
                     
@@ -207,8 +205,8 @@ var colText = colNames.value;
             var link = document.createElement('a');
             var url = URL.createObjectURL(blob);
             
-            link.href = url;
-            link.download = tableName + '.csv';
+            link.setAttribute('href', url);
+            link.setAttribute('download', tableName + '.csv');
             
             document.body.appendChild(link);
             link.click();
@@ -227,3 +225,12 @@ var colText = colNames.value;
                 document.getElementById('rows').value = '3';
             }
         }
+document.addEventListener('DOMContentLoaded', function() {
+            createTable();
+            document.getElementById('createBtn').addEventListener('click', createTable);
+            document.getElementById('exportBtn').addEventListener('click', exportToExcel);
+            document.getElementById('clearBtn').addEventListener('click', clearTable);
+        });
+    </script>
+</body>
+</html>
