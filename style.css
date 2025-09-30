@@ -1,159 +1,230 @@
-.btn-success:hover {
-            background: #0da271;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+> Fertyni:
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактор таблиц</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f0f0f0;
         }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
-        }
-
-        .table-container {
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
             background: white;
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-            overflow-x: auto;
+            padding: 20px;
+            border-radius: 10px;
         }
-
-        #editableTable {
-            black: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        h1 {
+            text-align: center;
+            color: #333;
         }
-
-        #editableTable th,
-        #editableTable td {
-            border: 1px solid var(--border);
-            padding: 16px;
-            text-align: left;
-            min-width: 120px;
-            transition: all 0.2s ease;
+        .controls {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
         }
-
-        .column-header {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            font-weight: 600;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            position: relative;
+        .control-group {
+            margin: 10px 0;
         }
-
-        .column-header:after {
-            content: '✎';
-            position: absolute;
-            right: 10px;
-            opacity: 0.7;
-            font-size: 12px;
-        }
-
-        .row-header {
-            background: linear-gradient(135deg, var(--secondary), #0da271);
-            color: white;
-            font-weight: 600;
-            font-size: 14px;
-            position: relative;
-        }
-
-        .row-header:after {
-            content: '✎';
-            position: absolute;
-            right: 10px;
-            opacity: 0.7;
-            font-size: 12px;
-        }
-
-        .data-cell {
-            background: var(--light);
-            font-size: 14px;
-            position: relative;
-        }
-
-        .data-cell:focus,
-        .column-header:focus,
-        .row-header:focus {
-            background: #fff9db;
-            outline: 2px solid var(--warning);
-            box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
-            z-index: 1;
-        }
-
-        .data-cell:hover {
-            background: #f1f5f9;
-        }
-
-        .info-card {
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            border-radius: 15px;
-            padding: 25px;
-            margin-top: 30px;
-            border-left: 5px solid var(--warning);
-        }
-
-        .info-card h3 {
-            color: var(--dark);
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .info-card ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .info-card li {
-            padding: 8px 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--dark);
-        }
-
-        .info-card li:before {
-            content: '✓';
-            background: var(--warning);
-            color: white;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
+        label {
+            display: block;
+            margin-bottom: 5px;
             font-weight: bold;
         }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+        input {
+            padding: 8px;
+            width: 200px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-create { background: #4CAF50; color: white; }
+        .btn-export { background: #2196F3; color: white; }
+        .btn-clear { background: #f44336; color: white; }
+        #editableTable {
+            width: 100%;
+            border-collapse: collapse;
             margin-top: 20px;
         }
+        #editableTable th, #editableTable td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        .column-header {
+            background: #2196F3;
+            color: white;
+        }
+        .row-header {
+            background: #4CAF50;
+            color: white;
+        }
+        .data-cell {
+            background: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Редактор таблиц</h1>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label>Колонки:</label>
+                <input type="number" id="columns" value="3" min="1" max="10">
+            </div>
+            <div class="control-group">
+                <label>Строки:</label>
+                <input type="number" id="rows" value="3" min="1" max="20">
+            </div>
+            <div class="control-group">
+                <label>Название таблицы:</label>
+                <input type="text" id="tableTitle" placeholder="Название">
+            </div>
+            <div class="control-group">
+                <label>Названия колонок (через запятую):</label>
+                <input type="text" id="columnNames" placeholder="Имя, Возраст, Город">
+            </div>
+            <div class="control-group">
+                <label>Названия строк (через запятую):</label>
+                <input type="text" id="rowNames" placeholder="Иван, Мария, Петр">
+            </div>
+            
+            <button class="btn-create" id="createBtn">Создать таблицу</button>
+            <button class="btn-export" id="exportBtn">Экспорт в Excel</button>
+            <button class="btn-clear" id="clearBtn">Очистить всё</button>
+        </div>
 
-        .stat-card {
-            background: var(--light);
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            border: 1px solid var(--border);
+        <table id="editableTable"></table>
+    </div>
+
+    <script>
+        function createTable() {
+            var col = document.getElementById('columns');
+            var row = document.getElementById('rows');
+            var table = document.getElementById('editableTable');
+            var colNames = document.getElementById('columnNames');
+            var rowNames = document.getElementById('rowNames');
+            
+            var cols = parseInt(col.value) || 3;
+            var rows = parseInt(row.value) || 3;
+
+> Fertyni:
+var colText = colNames.value;
+            var rowText = rowNames.value;
+            
+            table.innerHTML = '';
+            
+            var cNames = [];
+            if (colText) {
+                var parts = colText.split(',');
+                for (var i = 0; i < parts.length; i++) {
+                    cNames.push(parts[i].trim());
+                }
+            }
+            
+            var rNames = [];
+            if (rowText) {
+                var parts = rowText.split(',');
+                for (var i = 0; i < parts.length; i++) {
+                    rNames.push(parts[i].trim());
+                }
+            }
+            
+            var headRow = table.insertRow();
+            var emptyHead = document.createElement('th');
+            emptyHead.textContent = '';
+            headRow.appendChild(emptyHead);
+            
+            for (var i = 0; i < cols; i++) {
+                var th = document.createElement('th');
+                th.textContent = cNames[i] || 'Колонка ' + (i + 1);
+                th.contentEditable = true;
+                th.className = 'column-header';
+                headRow.appendChild(th);
+            }
+            
+            for (var i = 0; i < rows; i++) {
+                var tr = table.insertRow();
+                var rowHead = tr.insertCell();
+                rowHead.textContent = rNames[i] || 'Строка ' + (i + 1);
+                rowHead.contentEditable = true;
+                rowHead.className = 'row-header';
+                
+                for (var j = 0; j < cols; j++) {
+                    var cell = tr.insertCell();
+                    cell.contentEditable = true;
+                    cell.textContent = '';
+                    cell.className = 'data-cell';
+                }
+            }
         }
 
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--primary);
+        function exportToExcel() {
+            var table = document.getElementById('editableTable');
+            var title = document.getElementById('tableTitle');
+            var tableName = title.value || 'Таблица';
+            
+            if (table.rows.length === 0) {
+                alert('Таблица пустая!');
+                return;
+            }
+            
+            var data = [];
+            data.push([tableName]);
+            data.push([]);
+            
+            for (var i = 0; i < table.rows.length; i++) {
+                var line = [];
+                var cells = table.rows[i].cells;
+                
+                for (var j = 0; j < cells.length; j++) {
+                    var text = cells[j].textContent;
+                    text = text.replace(/"/g, '""');
+                    
+                    if (text.indexOf(',') >= 0 ⠟⠺⠞⠵⠟⠺⠟⠞⠞⠺⠟⠵⠞⠺⠵⠟⠞⠟⠵⠺⠺⠺⠞⠺ text.indexOf('\n') >= 0) {
+                        text = '"' + text + '"';
+                    }
+                    
+                    line.push(text);
+                }
+                data.push(line.join(','));
+            }
+            
+            var csv = data.join('\n');
+            var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            var link = document.createElement('a');
+            var url = URL.createObjectURL(blob);
+            
+            link.href = url;
+            link.download = tableName + '.csv';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert('Таблица экспортирована!');
+        }
+
+        function clearTable() {
+            if (confirm('Очистить всю таблицу?')) {
+                document.getElementById('editableTable').innerHTML = '';
+                document.getElementById('tableTitle').value = '';
+                document.getElementById('columnNames').value = '';
+                document.getElementById('rowNames').value = '';
+                document.getElementById('columns').value = '3';
+                document.getElementById('rows').value = '3';
+            }
         }
