@@ -20,7 +20,7 @@
         }
         h1 {
             text-align: center;
-            color: #54333;
+            color: #333;
         }
         .controls {
             margin: 20px 0;
@@ -182,14 +182,14 @@ table.innerHTML = '';
                 var cells = table.rows[i].cells;
                 
                 for (var j = 0; j < cells.length; j++) {
-                    var text = cells[j].textContent;
-                    text = text.replace(/"/g, '""');
+                    var cellText = cells[j].textContent;
+                    cellText = cellText.replace(/"/g, '""');
                     
-                    if (text.indexOf(',') >= 0  text.indexOf('\n') >= 0) {
-                        text = '"' + text + '"';
+                    if (cellText.indexOf(',') >= 0  cellText.indexOf('\n') >= 0) {
+                        cellText = '"' + cellText + '"';
                     }
                     
-                    row.push(text);
+                    row.push(cellText);
                 }
                 csv.push(row.join(','));
             }
@@ -227,4 +227,4 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     </script>
 </body>
-</html
+</html>
