@@ -1,231 +1,121 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Table Editor</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background: #f5f5f5;
+function makeTable() {
+    var colCount = document.getElementById('columns');
+    var rowCount = document.getElementById('rows');
+    var tableElement = document.getElementById('editableTable');
+    var colNamesInput = document.getElementById('columnNames');
+    var rowNamesInput = document.getElementById('rowNames');
+    
+    var numCols = parseInt(colCount.value) || 3;
+    var numRows = parseInt(rowCount.value) || 3;
+    var colText = colNamesInput.value;
+    var rowText = rowNamesInput.value;
+    
+    tableElement.innerHTML = '';
+    
+    var columnTitles = [];
+    if (colText) {
+        var nameList = colText.split(',');
+        for (var i = 0; i < nameList.length; i++) {
+            columnTitles.push(nameList[i].trim());
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    var rowTitles = [];
+    if (rowText) {
+        var nameList = rowText.split(',');
+        for (var i = 0; i < nameList.length; i++) {
+            rowTitles.push(nameList[i].trim());
         }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        .controls {
-            margin: 20px 0;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 5px;
-        }
-        .control-group {
-            margin: 10px 0;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input {
-            padding: 8px;
-            width: 200px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        button {
-            padding: 10px 20px;
-            margin: 5px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .btn-create { background: #4CAF50; color: white; }
-        .btn-export { background: #2196F3; color: white; }
-        .btn-clear { background: #f44336; color: white; }
-        #editableTable {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        #editableTable th, #editableTable td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-        }
-        .column-header {
-            background: #2196F3;
-            color: white;
-        }
-        .row-header {
-            background: #4CAF50;
-            color: white;
-        }
-        .data-cell {
-            background: #f9f9f9;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Редактор таблиц</h1>
+    }
+    
+    var headerRow = tableElement.insertRow();
+    var cornerCell = document.createElement('th');
+    cornerCell.textContent = '';
+    headerRow.appendChild(cornerCell);
+    
+    for (var i = 0; i < numCols; i++) {
+        var headerCell = document.createElement('th');
+        headerCell.textContent = columnTitles[i] || 'Колонка ' + (i + 1);
+        headerCell.contentEditable = true;
+        headerCell.className = 'column-header';
+        headerRow.appendChild(headerCell);
+    }
+    
+    for (var i = 0; i < numRows; i++) {
+        var tableRow = tableElement.insertRow();
+        var rowTitleCell = tableRow.insertCell();
+        rowTitleCell.textContent = rowTitles[i] || 'Строка ' + (i + 1);
+        rowTitleCell.contentEditable = true;
+        rowTitleCell.className = 'row-header';
         
-        <div class="controls">
-            <div class="control-group">
-                <label>Колонки:</label>
-                <input type="number" id="columns" value="3" min="1" max="10">
-            </div>
-            <div class="control-group">
-                <label>Строки:</label>
-                <input type="number" id="rows" value="3" min="1" max="20">
-            </div>
-            <div class="control-group">
-                <label>Название таблицы:</label>
-                <input type="text" id="tableTitle" placeholder="Название">
-            </div>
-            <div class="control-group">
-                <label>Названия колонок (через запятую):</label>
-                <input type="text" id="columnNames" placeholder="Имя, Возраст, Город">
-            </div>
-            <div class="control-group">
-                <label>Названия строк (через запятую):</label>
-                <input type="text" id="rowNames" placeholder="Иван, Мария, Петр">
-            </div>
-            
-            <button class="btn-create" id="createBtn">Создать таблицу</button>
-            <button class="btn-export" id="exportBtn">Экспорт в Excel</button>
-            <button class="btn-clear" id="clearBtn">Очистить всё</button>
-        </div>
-
-        <table id="editableTable"></table>
-    </div>
-
-    <script>
-        function createTable() {
-            var a = parseInt(document.getElementById('columns').value) || 3;
-            var b = parseInt(document.getElementById('rows').value) || 3;
-            var t = document.getElementById('editableTable');
-            var c = document.getElementById('columnNames').value;
-            var r = document.getElementById('rowNames').value;
-t.innerHTML = '';
-            
-            var cn = [];
-            if (c) {
-                var n = c.split(',');
-                for (var i = 0; i < n.length; i++) {
-                    cn.push(n[i].trim());
-                }
-            }
-            
-            var rn = [];
-            if (r) {
-                var n = r.split(',');
-                for (var i = 0; i < n.length; i++) {
-                    rn.push(n[i].trim());
-                }
-            }
-            
-            var hr = t.insertRow();
-            var eh = document.createElement('th');
-            eh.textContent = '';
-            hr.appendChild(eh);
-            
-            for (var i = 0; i < a; i++) {
-                var th = document.createElement('th');
-                th.textContent = cn[i] || 'Колонка ' + (i + 1);
-                th.contentEditable = true;
-                th.className = 'column-header';
-                hr.appendChild(th);
-            }
-            
-            for (var i = 0; i < b; i++) {
-                var row = t.insertRow();
-                var rh = row.insertCell();
-                rh.textContent = rn[i] || 'Строка ' + (i + 1);
-                rh.contentEditable = true;
-                rh.className = 'row-header';
-                
-                for (var j = 0; j < a; j++) {
-                    var cell = row.insertCell();
-                    cell.contentEditable = true;
-                    cell.textContent = '';
-                    cell.className = 'data-cell';
-                }
-            }
+        for (var j = 0; j < numCols; j++) {
+            var dataCell = tableRow.insertCell();
+            dataCell.contentEditable = true;
+            dataCell.textContent = '';
+            dataCell.className = 'data-cell';
         }
+    }
+}
 
-        function exportToExcel() {
-            var t = document.getElementById('editableTable');
-            var tt = document.getElementById('tableTitle').value || 'Таблица';
+function saveToExcel() {
+    var tableElement = document.getElementById('editableTable');
+    var titleInput = document.getElementById('tableTitle');
+    var fileName = titleInput.value || 'Таблица';
+    
+    if (tableElement.rows.length === 0) {
+        alert('Сначала создайте таблицу!');
+        return;
+    }
+    
+    var outputData = [];
+    outputData.push([fileName]);
+    outputData.push([]);
+    
+    for (var i = 0; i < tableElement.rows.length; i++) {
+        var dataLine = [];
+        var rowCells = tableElement.rows[i].cells;
+        
+        for (var j = 0; j < rowCells.length; j++) {
+            var cellData = rowCells[j].textContent;
+            cellData = cellData.replace(/"/g, '""');
             
-            if (!t.rows.length) {
-                alert('Таблица пустая!');
-                return;
+            if (cellData.indexOf(',') >= 0  cellData.indexOf('\n') >= 0) {
+                cellData = '"' + cellData + '"';
             }
             
-            var csv = [];
-            csv.push([tt]);
-            csv.push([]);
-            
-            for (var i = 0; i < t.rows.length; i++) {
-                var row = [];
-                var cells = t.rows[i].cells;
-                
-                for (var j = 0; j < cells.length; j++) {
-                    var x = cells[j].textContent;
-                    x = x.replace(/"/g, '""');
-                    
-                    if (x.indexOf(',') >= 0  x.indexOf('\n') >= 0) {
-                        x = '"' + x + '"';
-                    }
-                    
-                    row.push(x);
-                }
-                csv.push(row.join(','));
-            }
-            
-            var content = csv.join('\n');
-            var blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
-            var link = document.createElement('a');
-            var url = URL.createObjectURL(blob);
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', tt + '.csv');
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            alert('Таблица экспортирована!');
+            dataLine.push(cellData);
         }
+        outputData.push(dataLine.join(','));
+    }
+    
+    var csvOutput = outputData.join('\n');
+    var fileBlob = new Blob([csvOutput], { type: 'text/csv;charset=utf-8;' });
+    var downloadLink = document.createElement('a');
+    var fileUrl = URL.createObjectURL(fileBlob);
+    
+    downloadLink.setAttribute('href', fileUrl);
+    downloadLink.setAttribute('download', fileName + '.csv');
+    
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    
+    alert('Файл сохранен!');
+}
 
-        function clearTable() {
-            if (confirm('Очистить всю таблицу?')) {
-                document.getElementById('editableTable').innerHTML = '';
-                document.getElementById('tableTitle').value = '';
-                document.getElementById('columnNames').value = '';
-                document.getElementById('rowNames').value = '';
-                document.getElementById('columns').value = '3';
-                document.getElementById('rows').value = '3';
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            createTable();
-            document.getElementById('createBtn').addEventListener('click', createTable);
-            document.getElementById('exportBtn').addEventListener('click', exportToExcel);
-            document.getElementById('clearBtn').addEventListener('click', clearTable);
-        });
-    </script>
-</body>
-</html>
+function resetTable() {
+    if (confirm('Удалить таблицу?')) {
+        document.getElementById('editableTable').innerHTML = '';
+        document.getElementById('tableTitle').value = '';
+        document.getElementById('columnNames').value = '';
+        document.getElementById('rowNames').value = '';
+        document.getElementById('columns').value = '3';
+        document.getElementById('rows').value = '3';
+    }
+}
+document.addEventListener('DOMContentLoaded', function() {
+    makeTable();
+    document.getElementById('createBtn').addEventListener('click', makeTable);
+    document.getElementById('exportBtn').addEventListener('click', saveToExcel);
+    document.getElementById('clearBtn').addEventListener('click', resetTable);
+});
