@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickTable - Простые таблицы</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>QuickTable</h1>
+            <p>Создай таблицу за секунды</p>
+        </header>
+
+        <div class="controls">
+            <div class="input-group">
+                <label>Столбцы:</label>
+                <input type="number" id="columns" value="3" min="1" max="10">
+            </div>
+            <div class="input-group">
+                <label>Строки:</label>
+                <input type="number" id="rows" value="3" min="1" max="10">
+            </div>
+            <button onclick="createTable()">Создать таблицу</button>
+        </div>
+
+        <div class="table-container">
+            <table id="editableTable"></table>
+        </div>
+
+        <div class="export-buttons">
+            <button onclick="exportToPDF()">Сохранить в PDF</button>
+            <button onclick="clearTable()">Очистить</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
