@@ -198,22 +198,21 @@
             const columnNamesInput = document.getElementById('columnNames').value;
             const rowNamesInput = document.getElementById('rowNames').value;
             
-            // Очищаем таблицу
             table.innerHTML = '';
             
-            // Разбираем названия
-            const columnNames = columnNamesInput ? columnNamesInput.split(',').map(name => name.trim()) : [];
-            const rowNames = rowNamesInput ? rowNamesInput.split(',').map(name => name.trim()) : [];
+            const columnNames = columnNamesInput ? columnNamesInput.split(',').map(function(name) { 
+                return name.trim(); 
+            }) : [];
             
-            // Создаем заголовок
+            const rowNames = rowNamesInput ? rowNamesInput.split(',').map(function(name) { 
+                return name.trim(); 
+            }) : [];
+            
             const headerRow = table.insertRow();
-            
-            // Первая ячейка заголовка пустая
             const emptyHeader = document.createElement('th');
             emptyHeader.textContent = '';
             headerRow.appendChild(emptyHeader);
             
-            // Заголовки колонок
             for (let i = 0; i < columns; i++) {
                 const th = document.createElement('th');
                 th.textContent = columnNames[i] || 'Колонка ' + (i + 1);
@@ -222,17 +221,13 @@
                 headerRow.appendChild(th);
             }
             
-            // Создаем строки с названиями
             for (let i = 0; i < rows; i++) {
                 const row = table.insertRow();
-                
-                // Ячейка с названием строки
                 const rowHeader = row.insertCell();
                 rowHeader.textContent = rowNames[i] || 'Строка ' + (i + 1);
                 rowHeader.contentEditable = true;
                 rowHeader.className = 'row-header';
                 
-                // Обычные ячейки
                 for (let j = 0; j < columns; j++) {
                     const cell = row.insertCell();
                     cell.contentEditable = true;
@@ -258,13 +253,15 @@
             
             for (let i = 0; i < table.rows.length; i++) {
                 let row = [];
-const cells = table.rows[i].cells;
+                const cells = table.rows[i].cells;
                 
                 for (let j = 0; j < cells.length; j++) {
-                    let cellContent = cells[j].textContent.replace(/"/g, '""');
-                    if (cellContent.includes(',')  cellContent.includes('\n')) {
+                    let cellContent = cells[j].textContent;
+                    cellContent = cellContent.replace(/"/g, '""');
+if (cellContent.indexOf(',') >= 0  cellContent.indexOf('\n') >= 0) {
                         cellContent = '"' + cellContent + '"';
                     }
+                    
                     row.push(cellContent);
                 }
                 csv.push(row.join(','));
@@ -277,13 +274,12 @@ const cells = table.rows[i].cells;
             
             link.setAttribute('href', url);
             link.setAttribute('download', tableTitle + '.csv');
-            link.style.visibility = 'hidden';
             
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             
-            alert('Таблица экспортирована!');
+            alert('Таблица экспортирована в CSV файл!');
         }
 
         // Функция очистки
@@ -298,12 +294,10 @@ const cells = table.rows[i].cells;
             }
         }
 
-        // Назначаем обработчики событий после загрузки DOM
+        // Назначаем обработчики событий
         document.addEventListener('DOMContentLoaded', function() {
-            // Создаем таблицу при загрузке
             createTable();
             
-            // Назначаем кнопкам обработчики
             document.getElementById('createBtn').addEventListener('click', createTable);
             document.getElementById('exportBtn').addEventListener('click', exportToExcel);
             document.getElementById('clearBtn').addEventListener('click', clearTable);
