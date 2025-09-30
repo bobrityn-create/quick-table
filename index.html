@@ -400,7 +400,7 @@ function downloadTable() {
                     let cellValue = cells[j].textContent;
                     cellValue = cellValue.replace(/"/g, '""');
                     
-                    if (cellValue.includes(',')  cellValue.includes('\n')) {
+                    if (cellValue.includes(',') || cellValue.includes('\n')) {
                         cellValue = '"' + cellValue + '"';
                     }
                     
