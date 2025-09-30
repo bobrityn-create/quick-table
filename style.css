@@ -185,7 +185,6 @@ var colText = colNames.value;
             var data = [];
             data.push([tableName]);
             data.push([]);
-            
             for (var i = 0; i < table.rows.length; i++) {
                 var line = [];
                 var cells = table.rows[i].cells;
