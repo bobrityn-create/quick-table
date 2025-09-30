@@ -63,13 +63,13 @@ function exportToExcel() {
     }
 }
 // Управление подпиской и пробным периодом
-let trialTimeLeft = 600; // 10 минут в секундах
+let trialTimeLeft = 60; // 1 минут в секундах
 let isTrialActive = false;
 let isPremium = false;
 
 function startTrial() {
     isTrialActive = true;
-    trialTimeLeft = 600; // 10 минут
+    trialTimeLeft = 60; // 1 минут
     localStorage.setItem('trialStart', Date.now().toString());
     localStorage.setItem('trialActive', 'true');
     hideSubscriptionModal();
