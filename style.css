@@ -152,3 +152,41 @@ td:focus {
         width: 80px;
     }
 }
+.column-header {
+    background-color: #e3f2fd;
+    font-weight: bold;
+    min-width: 100px;
+}
+
+.row-header {
+    background-color: #f3e5f5;
+    font-weight: bold;
+    min-width: 80px;
+}
+
+.data-cell {
+    background-color: #fafafa;
+    min-width: 80px;
+    min-height: 30px;
+}
+
+.controls {
+    margin: 20px 0;
+}
+
+.controls input, .controls button {
+    margin: 5px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.controls button {
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+}
+
+.controls button:hover {
+    background-color: #45a049;
+}
