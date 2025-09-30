@@ -62,3 +62,136 @@ function exportToExcel() {
         alert('Ошибка при экспорте: ' + error.message);
     }
 }
+// Управление подпиской и пробным периодом
+let trialTimeLeft = 600; // 10 минут в секундах
+let isTrialActive = false;
+let isPremium = false;
+
+function startTrial() {
+    isTrialActive = true;
+    trialTimeLeft = 600; // 10 минут
+    localStorage.setItem('trialStart', Date.now().toString());
+    localStorage.setItem('trialActive', 'true');
+    hideSubscriptionModal();
+    startTrialTimer();
+    updateUI();
+}
+
+function subscribe() {
+    // Здесь интеграция с платежной системой
+    isPremium = true;
+    isTrialActive = false;
+    localStorage.setItem('premium', 'true');
+    hideSubscriptionModal();
+    updateUI();
+    alert('🎉 Спасибо за покупку подписки! Теперь все функции доступны!');
+}
+
+function showSubscriptionModal() {
+    document.getElementById('subscriptionModal').style.display = 'flex';
+}
+
+function hideSubscriptionModal() {
+    document.getElementById('subscriptionModal').style.display = 'none';
+}
+
+function startTrialTimer() {
+    const timerElement = document.getElementById('trialTimer');
+    const trialBanner = document.getElementById('trialInfo');
+    
+    trialBanner.style.display = 'flex';
+    
+    const timer = setInterval(() => {
+        if (trialTimeLeft <= 0) {
+            clearInterval(timer);
+            trialBanner.style.display = 'none';
+            isTrialActive = false;
+            showSubscriptionModal();
+            return;
+        }
+        
+        const minutes = Math.floor(trialTimeLeft / 60);
+        const seconds = trialTimeLeft % 60;
+        timerElement.textContent = ${minutes}:${seconds.toString().padStart(2, '0')};
+        trialTimeLeft--;
+    }, 1000);
+}
+
+function checkTrialStatus() {
+    const trialStart = localStorage.getItem('trialStart');
+    const trialActive = localStorage.getItem('trialActive');
+    const premium = localStorage.getItem('premium');
+    
+    if (premium === 'true') {
+        isPremium = true;
+        return;
+    }
+    
+    if (trialActive === 'true' && trialStart) {
+        const timePassed = Math.floor((Date.now() - parseInt(trialStart)) / 1000);
+        trialTimeLeft = Math.max(0, 600 - timePassed);
+        
+        if (trialTimeLeft > 0) {
+            isTrialActive = true;
+            startTrialTimer();
+        } else {
+            showSubscriptionModal();
+        }
+    } else {
+        showSubscriptionModal();
+    }
+}
+
+function updateUI() {
+    const exportBtn = document.getElementById('exportBtn');
+    
+    if (isPremium || isTrialActive) {
+        exportBtn.disabled = false;
+        exportBtn.style.opacity = '1';
+    } else {
+        exportBtn.disabled = true;
+        exportBtn.style.opacity = '0.6';
+    }
+}
+
+// Модифицируем функцию экспорта для проверки подписки
+function exportToExcel() {
+    if (!isPremium && !isTrialActive) {
+        showSubscriptionModal();
+        return;
+    }
+    
+    // Твоя существующая функция экспорта
+    try {
+        const table = document.getElementById('editableTable');
+        const tableTitle = document.getElementById('tableTitle').value || 'Таблица';
+
+        if (!table.rows.length) {
+            alert('Таблица пустая! Сначала создайте таблицу.');
+            return;
+        }
+
+        // ... остальной код экспорта ...
+        
+    } catch (error) {
+        console.error('Ошибка экспорта:', error);
+        alert('Ошибка при экспорте: ' + error.message);
+    }
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    checkTrialStatus();
+    updateUI();
+    
+    // Закрытие модального окна
+    document.querySelector('.close').addEventListener('click', hideSubscriptionModal);
+    
+    // Закрытие при клике вне модального окна
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('subscriptionModal');
+        if (event.target === modal) {
+            hideSubscriptionModal();
+        }
+    });
+});
