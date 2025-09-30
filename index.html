@@ -458,3 +458,40 @@ function downloadTable() {
         <table id="editableTable"></table>
     </section>
 </div>
+<!-- Добавь этот код перед закрывающим </body> -->
+<div id="subscriptionModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>🕒 Пробный период закончился</h2>
+        <div class="subscription-plans">
+            <div class="plan-card">
+                <h3>🔥 Пробный период</h3>
+                <p class="price">Бесплатно</p>
+                <ul>
+                    <li>✅ Создание таблиц</li>
+                    <li>✅ Редактирование ячеек</li>
+                    <li>❌ Экспорт в Excel</li>
+                    <li>❌ Сохранение таблиц</li>
+                </ul>
+                <button class="plan-btn" onclick="startTrial()">Начать пробный период</button>
+            </div>
+            
+            <div class="plan-card premium">
+                <h3>⭐ Премиум подписка</h3>
+                <p class="price">15 руб/месяц</p>
+                <ul>
+                    <li>✅ Все функции пробного периода</li>
+                    <li>✅ Экспорт в Excel</li>
+                    <li>✅ Сохранение таблиц</li>
+                    <li>✅ Приоритетная поддержка</li>
+                </ul>
+                <button class="plan-btn premium-btn" onclick="subscribe()">Купить подписку</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="trialInfo" class="trial-banner" style="display: none;">
+    <span>⏰ Пробный период: <span id="trialTimer">10:00</span></span>
+    <button onclick="showSubscriptionModal()">Перейти на премиум</button>
+</div>
