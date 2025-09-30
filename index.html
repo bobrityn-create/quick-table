@@ -182,14 +182,14 @@ table.innerHTML = '';
                 var cells = table.rows[i].cells;
                 
                 for (var j = 0; j < cells.length; j++) {
-                    var content = cells[j].textContent;
-                    content = content.replace(/"/g, '""');
+                    var text = cells[j].textContent;
+                    text = text.replace(/"/g, '""');
                     
-                    if (content.indexOf(',') >= 0  content.indexOf('\n') >= 0) {
-                        content = '"' + content + '"';
+                    if (text.indexOf(',') >= 0  text.indexOf('\n') >= 0) {
+                        text = '"' + text + '"';
                     }
                     
-                    row.push(content);
+                    row.push(text);
                 }
                 csv.push(row.join(','));
             }
@@ -227,4 +227,4 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     </script>
 </body>
-</html>
+</html
