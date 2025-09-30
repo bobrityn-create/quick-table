@@ -353,7 +353,7 @@
             
             for (let i = 0; i < cols; i++) {
                 const th = document.createElement('th');
-                th.textContent = colNames[i] || Колонка ${i + 1};
+                th.textContent = colNames[i] || Колонка {i + 1};
                 th.contentEditable = true;
                 th.className = 'table-header';
                 headerRow.appendChild(th);
