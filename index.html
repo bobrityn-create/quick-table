@@ -3,38 +3,395 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuickTable - Простые таблицы</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Table Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        input {
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 14px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .btn-create {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-create:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .btn-export {
+            background: #2196F3;
+            color: white;
+        }
+
+        .btn-export:hover {
+            background: #1976D2;
+            transform: translateY(-2px);
+        }
+
+        .btn-clear {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-clear:hover {
+            background: #d32f2f;
+            transform: translateY(-2px);
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        #editableTable {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        #editableTable th,
+        #editableTable td {
+            border: 1px solid #ddd;
+            padding: 15px;
+            text-align: left;
+            min-width: 120px;
+        }
+
+        .column-header {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .row-header {
+            background: #4CAF50;
+            color: white;
+            font-weight: 600;
+        }
+
+        .data-cell {
+            background: #f8f9fa;
+            transition: background-color 0.2s;
+        }
+
+        .data-cell:focus {
+            background: #fff9c4;
+            outline: 2px solid #ffd54f;
+        }
+
+        .info {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 20px
+            margin-top: 20px;
+            border-left: 4px solid #2196F3;
+        }
+        .info h3 {
+            margin-bottom: 10px;
+            color: #1976D2;
+        }
+
+        .info ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info li {
+            padding: 5px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .info li:before {
+            content: "✓";
+            color: #4CAF50;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .buttons {
+                flex-direction: column;
+            }
+            
+            button {
+                min-width: auto;
+            }
+            
+            .controls {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>QuickTable</h1>
-            <p>Создай таблицу за секунды</p>
-        </header>
+        <div class="header">
+            <h1>📊 Редактор таблиц</h1>
+            <p>Создавайте и редактируйте таблицы онлайн</p>
+        </div>
 
-        <div class="controls">
-            <div class="input-group">
-                <label>Столбцы:</label>
-                <input type="number" id="columns" value="3" min="1" max="10">
+        <div class="main-card">
+            <div class="controls">
+                <div class="control-group">
+                    <label for="columns">Количество колонок:</label>
+                    <input type="number" id="columns" value="3" min="1" max="10">
+                </div>
+                
+                <div class="control-group">
+                    <label for="rows">Количество строк:</label>
+                    <input type="number" id="rows" value="3" min="1" max="20">
+                </div>
+                
+                <div class="control-group">
+                    <label for="tableTitle">Название таблицы:</label>
+                    <input type="text" id="tableTitle" placeholder="Введите название">
+                </div>
+                
+                <div class="control-group">
+                    <label for="columnNames">Названия колонок (через запятую):</label>
+                    <input type="text" id="columnNames" placeholder="Имя, Возраст, Город">
+                </div>
+                
+                <div class="control-group">
+                    <label for="rowNames">Названия строк (через запятую):</label>
+                    <input type="text" id="rowNames" placeholder="Иван, Мария, Петр">
+                </div>
             </div>
-            <div class="input-group">
-                <label>Строки:</label>
-                <input type="number" id="rows" value="3" min="1" max="10">
+
+            <div class="buttons">
+                <button class="btn-create" onclick="createTable()">🔄 Создать таблицу</button>
+                <button class="btn-export" onclick="exportToExcel()">📥 Экспорт в Excel</button>
+                <button class="btn-clear" onclick="clearTable()">🗑️ Очистить всё</button>
             </div>
-            <button onclick="createTable()">Создать таблицу</button>
         </div>
 
         <div class="table-container">
             <table id="editableTable"></table>
         </div>
 
-        <div class="export-buttons">
-            <button onclick="exportToPDF()">Сохранить в PDF</button>
-            <button onclick="clearTable()">Очистить</button>
+        <div class="info">
+            <h3>💡 Как использовать:</h3>
+            <ul>
+                <li>Введите количество колонок и строк</li>
+                <li>Добавьте названия через запятую (опционально)</li>
+                <li>Нажмите "Создать таблицу"</li>
+                <li>Кликайте по ячейкам для редактирования</li>
+                <li>Экспортируйте в Excel когда готово</li>
+            </ul>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // Глобальные функции
+        function createTable() {
+            try {
+                const columns = parseInt(document.getElementById('columns').value) || 3;
+                const rows = parseInt(document.getElementById('rows').value) || 3;
+                const table = document.getElementById('editableTable');
+                const columnNamesInput = document.getElementById('columnNames').value;
+                const rowNamesInput = document.getElementById('rowNames').value;
+                
+                // Очищаем таблицу
+                table.innerHTML = '';
+                
+                // Разбираем названия
+                const columnNames = columnNamesInput ? columnNamesInput.split(',').map(name => name.trim()) : [];
+                const rowNames = rowNamesInput ? rowNamesInput.split(',').map(name => name.trim()) : [];
+                
+                // Создаем заголовок
+                const headerRow = table.insertRow();
+                
+                // Первая ячейка заголовка пустая (для строк)
+                const emptyHeader = document.createElement('th');
+                emptyHeader.textContent = '';
+                headerRow.appendChild(emptyHeader);
+                
+                // Заголовки колонок
+                for (let i = 0; i < columns; i++) {
+                    const th = document.createElement('th');
+                    th.textContent = columnNames[i] || Колонка ${i + 1};
+                    th.contentEditable = true;
+                    th.className = 'column-header';
+                    headerRow.appendChild(th);
+                }
+                
+                // Создаем строки с названиями
+                for (let i = 0; i < rows; i++) {
+                    const row = table.insertRow();
+                    
+                    // Ячейка с названием строки
+                    const rowHeader = row.insertCell();
+                    rowHeader.textContent = rowNames[i] || Строка ${i + 1};
+                    rowHeader.contentEditable = true;
+                    rowHeader.className = 'row-header';
+                    
+                    // Обычные ячейки
+                    for (let j = 0; j < columns; j++) {
+                        const cell = row.insertCell();
+                        cell.contentEditable = true;
+                        cell.textContent = '';
+                        cell.className = 'data-cell';
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Ошибка при создании таблицы: ' + error.message);
+            }
+        }
+
+        function exportToExcel() {
+            try {
+                const table = document.getElementById('editableTable');
+                const tableTitle = document.getElementById('tableTitle').value || 'Таблица';
+                
+                if (!table.rows.length) {
+                    alert('Таблица пустая! Создайте таблицу сначала.');
+                    return;
+                }
+                
+                let csv = [];
+                csv.push([tableTitle]);
+                csv.push([]);
+                
+                for (let i = 0; i < table.rows.length; i++) {
+                    let row = [];
+                    const cells = table.rows[i].cells;
+                    
+                    for (let j = 0; j < cells.length; j++) {
+                        let cellContent = cells[j].textContent.replace(/"/g, '""');
+                        if (cellContent.includes(',') ⠺⠞⠺⠺⠺⠞⠟⠞⠟⠵⠺⠟⠺⠵⠞⠟⠟⠞⠵⠞⠺⠞⠞⠞⠞⠵⠞ cellContent.includes('\n')) {
+                            cellContent = '"' + cellContent + '"';
+                        }
+                        row.push(cellContent);
+                    }
+                    csv.push(row.join(','));
+                }
+                
+                const csvContent = csv.join('\n');
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                
+                link.setAttribute('href', url);
+                link.setAttribute('download', ${tableTitle}.csv);
+                link.style.visibility = 'hidden';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                alert(✅ Таблица "${tableTitle}" экспортирована в CSV файл!);
+                
+            } catch (error) {
+                console.error('Ошибка экспорта:', error);
+                alert('❌ Ошибка при экспорте: ' + error.message);
+            }
+        }
+        function clearTable() {
+            if (confirm('Очистить всю таблицу и все введенные данные?')) {
+                document.getElementById('editableTable').innerHTML = '';
+                document.getElementById('tableTitle').value = '';
+                document.getElementById('columnNames').value = '';
+                document.getElementById('rowNames').value = '';
+                document.getElementById('columns').value = '3';
+                document.getElementById('rows').value = '3';
+            }
+        }
+
+        // Создаем таблицу при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            createTable();
+        });
+    </script>
 </body>
 </html>
