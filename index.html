@@ -334,46 +334,51 @@
 
     <script>
         function generateTable() {
-            const cols = parseInt(document.getElementById('tableColumns').value) || 4;
-            const rows = parseInt(document.getElementById('tableRows').value) || 5;
-            const table = document.getElementById('mainTable');
-            const colText = document.getElementById('columnHeaders').value;
-            const rowText = document.getElementById('rowTitles').value;
-            
-            table.innerHTML = '';
-            
-            const colNames = colText ? colText.split(',').map(name => name.trim()) : [];
-            const rowNames = rowText ? rowText.split(',').map(name => name.trim()) : [];
-            
-            const headerRow = table.insertRow();
-            const cornerCell = document.createElement('th');
-            cornerCell.textContent = '';
-            cornerCell.className = 'table-corner';
-            headerRow.appendChild(cornerCell);
-            
-            for (let i = 0; i < cols; i++) {
-                const th = document.createElement('th');
-                th.textContent = colNames[i] || Колонка x{i + 1};
-                th.contentEditable = true;
-                th.className = 'table-header';
-                headerRow.appendChild(th);
-            }
-            
-            for (let i = 0; i < rows; i++) {
-                const tr = table.insertRow();
-                const rowHeader = tr.insertCell();
-                rowHeader.textContent = rowNames[i] || Строка ${i + 1};
-                rowHeader.contentEditable = true;
-                rowHeader.className = 'table-row-header';
-                
-                for (let j = 0; j < cols; j++) {
-                    const cell = tr.insertCell();
-                    cell.contentEditable = true;
-                    cell.textContent = '';
-                    cell.className = 'table-cell';
-                }
-            }
+    const cols = parseInt(document.getElementById('tableColumns').value) || 4;
+    const rows = parseInt(document.getElementById('tableRows').value) || 5;
+    const table = document.getElementById('mainTable');
+    const colText = document.getElementById('columnHeaders').value;
+    const rowText = document.getElementById('rowTitles').value;
+    
+    table.innerHTML = '';
+    
+    const colNames = colText ? colText.split(',').map(function(name) { 
+        return name.trim(); 
+    }) : [];
+    
+    const rowNames = rowText ? rowText.split(',').map(function(name) { 
+        return name.trim(); 
+    }) : [];
+    
+    const headerRow = table.insertRow();
+    const cornerCell = document.createElement('th');
+    cornerCell.textContent = '';
+    cornerCell.className = 'table-corner';
+    headerRow.appendChild(cornerCell);
+    
+    for (let i = 0; i < cols; i++) {
+        const th = document.createElement('th');
+        th.textContent = colNames[i] || 'Колонка ' + (i + 1);
+        th.contentEditable = true;
+        th.className = 'table-header';
+        headerRow.appendChild(th);
+    }
+    
+    for (let i = 0; i < rows; i++) {
+        const tr = table.insertRow();
+        const rowHeader = tr.insertCell();
+        rowHeader.textContent = rowNames[i] || 'Строка ' + (i + 1);
+        rowHeader.contentEditable = true;
+        rowHeader.className = 'table-row-header';
+        
+        for (let j = 0; j < cols; j++) {
+            const cell = tr.insertCell();
+            cell.contentEditable = true;
+            cell.textContent = '';
+            cell.className = 'table-cell';
         }
+    }
+}
 function downloadTable() {
             const table = document.getElementById('mainTable');
             const tableName = document.getElementById('tableName').value || 'МояТаблица';
