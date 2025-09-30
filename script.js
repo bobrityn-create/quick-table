@@ -1,8 +1,3 @@
-console.log('=== Script loaded ===');
-
-function createTable() {
-    console.log('createTable started')
-}
 function createTable() {
     const columns = parseInt(document.getElementById('columns').value);
     const rows = parseInt(document.getElementById('rows').value);
@@ -15,7 +10,7 @@ function createTable() {
     const headerRow = table.insertRow();
     for (let i = 0; i < columns; i++) {
         const th = document.createElement('th');
-        th.textContent = Колонка ${i + 1};
+        th.textContent = 'Колонка ' + (i + 1); // Убрал обратные кавычки
         th.contentEditable = true;
         headerRow.appendChild(th);
     }
