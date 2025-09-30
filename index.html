@@ -1,121 +1,435 @@
-function makeTable() {
-    var colCount = document.getElementById('columns');
-    var rowCount = document.getElementById('rows');
-    var tableElement = document.getElementById('editableTable');
-    var colNamesInput = document.getElementById('columnNames');
-    var rowNamesInput = document.getElementById('rowNames');
-    
-    var numCols = parseInt(colCount.value) || 3;
-    var numRows = parseInt(rowCount.value) || 3;
-    var colText = colNamesInput.value;
-    var rowText = rowNamesInput.value;
-    
-    tableElement.innerHTML = '';
-    
-    var columnTitles = [];
-    if (colText) {
-        var nameList = colText.split(',');
-        for (var i = 0; i < nameList.length; i++) {
-            columnTitles.push(nameList[i].trim());
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор таблиц</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-    }
-    
-    var rowTitles = [];
-    if (rowText) {
-        var nameList = rowText.split(',');
-        for (var i = 0; i < nameList.length; i++) {
-            rowTitles.push(nameList[i].trim());
-        }
-    }
-    
-    var headerRow = tableElement.insertRow();
-    var cornerCell = document.createElement('th');
-    cornerCell.textContent = '';
-    headerRow.appendChild(cornerCell);
-    
-    for (var i = 0; i < numCols; i++) {
-        var headerCell = document.createElement('th');
-        headerCell.textContent = columnTitles[i] || 'Колонка ' + (i + 1);
-        headerCell.contentEditable = true;
-        headerCell.className = 'column-header';
-        headerRow.appendChild(headerCell);
-    }
-    
-    for (var i = 0; i < numRows; i++) {
-        var tableRow = tableElement.insertRow();
-        var rowTitleCell = tableRow.insertCell();
-        rowTitleCell.textContent = rowTitles[i] || 'Строка ' + (i + 1);
-        rowTitleCell.contentEditable = true;
-        rowTitleCell.className = 'row-header';
-        
-        for (var j = 0; j < numCols; j++) {
-            var dataCell = tableRow.insertCell();
-            dataCell.contentEditable = true;
-            dataCell.textContent = '';
-            dataCell.className = 'data-cell';
-        }
-    }
-}
 
-function saveToExcel() {
-    var tableElement = document.getElementById('editableTable');
-    var titleInput = document.getElementById('tableTitle');
-    var fileName = titleInput.value || 'Таблица';
-    
-    if (tableElement.rows.length === 0) {
-        alert('Сначала создайте таблицу!');
-        return;
-    }
-    
-    var outputData = [];
-    outputData.push([fileName]);
-    outputData.push([]);
-    
-    for (var i = 0; i < tableElement.rows.length; i++) {
-        var dataLine = [];
-        var rowCells = tableElement.rows[i].cells;
-        
-        for (var j = 0; j < rowCells.length; j++) {
-            var cellData = rowCells[j].textContent;
-            cellData = cellData.replace(/"/g, '""');
-            
-            if (cellData.indexOf(',') >= 0  cellData.indexOf('\n') >= 0) {
-                cellData = '"' + cellData + '"';
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .app-header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .app-title {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .app-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .control-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            margin-bottom: 30px;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .input-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .input-card:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+        }
+
+        .input-label {
+            display: block;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .action-btn {
+            padding: 18px 30px;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(33, 150, 243, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(244, 67, 54, 0.3);
+        }
+
+        .table-display {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            overflow-x: auto;
+        }
+.data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            min-width: 600px;
+        }
+
+        .table-corner {
+            background: #2d3748;
+            color: white;
+            font-weight: 700;
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            font-weight: 700;
+            padding: 18px;
+            text-align: center;
+            border: none;
+        }
+
+        .table-row-header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            font-weight: 700;
+            padding: 18px;
+            text-align: center;
+            border: none;
+        }
+
+        .table-cell {
+            background: #f8f9fa;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .table-cell:focus {
+            background: #fff9db;
+            outline: 3px solid #ffd54f;
+            box-shadow: 0 0 15px rgba(255, 213, 79, 0.3);
+        }
+
+        .info-section {
+            background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            border-left: 6px solid #e17055;
+        }
+
+        .info-title {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .feature-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .feature-item {
+            padding: 12px 0;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+        }
+
+        .feature-item::before {
+            content: "✓";
+            background: #00b894;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .app-title {
+                font-size: 2.2rem;
             }
             
-            dataLine.push(cellData);
+            .input-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-btn {
+                padding: 16px 25px;
+            }
         }
-        outputData.push(dataLine.join(','));
-    }
-    
-    var csvOutput = outputData.join('\n');
-    var fileBlob = new Blob([csvOutput], { type: 'text/csv;charset=utf-8;' });
-    var downloadLink = document.createElement('a');
-    var fileUrl = URL.createObjectURL(fileBlob);
-    
-    downloadLink.setAttribute('href', fileUrl);
-    downloadLink.setAttribute('download', fileName + '.csv');
-    
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
-    
-    alert('Файл сохранен!');
-}
 
-function resetTable() {
-    if (confirm('Удалить таблицу?')) {
-        document.getElementById('editableTable').innerHTML = '';
-        document.getElementById('tableTitle').value = '';
-        document.getElementById('columnNames').value = '';
-        document.getElementById('rowNames').value = '';
-        document.getElementById('columns').value = '3';
-        document.getElementById('rows').value = '3';
-    }
-}
-document.addEventListener('DOMContentLoaded', function() {
-    makeTable();
-    document.getElementById('createBtn').addEventListener('click', makeTable);
-    document.getElementById('exportBtn').addEventListener('click', saveToExcel);
-    document.getElementById('clearBtn').addEventListener('click', resetTable);
-});
+        .icon {
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1 class="app-title">📊 Генератор таблиц</h1>
+            <p class="app-subtitle">Создавайте и редактируйте таблицы в реальном времени</p>
+        </header>
+
+        <main class="control-panel">
+            <div class="input-grid">
+                <div class="input-card">
+                    <label class="input-label">🔢 Количество колонок</label>
+                    <input type="number" id="tableColumns" class="form-control" value="4" min="1" max="15">
+                </div>
+                
+                <div class="input-card">
+                    <label class="input-label">📏 Количество строк</label>
+                    <input type="number" id="tableRows" class="form-control" value="5" min="1" max="25">
+                </div>
+                
+                <div class="input-card">
+<label class="input-label">🏷️ Название таблицы</label>
+                    <input type="text" id="tableName" class="form-control" placeholder="Введите название...">
+                </div>
+                
+                <div class="input-card">
+                    <label class="input-label">📋 Заголовки колонок</label>
+                    <input type="text" id="columnHeaders" class="form-control" placeholder="Название, Количество, Цена...">
+                </div>
+                
+                <div class="input-card">
+                    <label class="input-label">👥 Названия строк</label>
+                    <input type="text" id="rowTitles" class="form-control" placeholder="Товар 1, Товар 2, Товар 3...">
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="action-btn btn-primary" onclick="generateTable()">
+                    <span class="icon">🔄</span> Создать таблицу
+                </button>
+                <button class="action-btn btn-secondary" onclick="downloadTable()">
+                    <span class="icon">💾</span> Сохранить в Excel
+                </button>
+                <button class="action-btn btn-danger" onclick="clearAll()">
+                    <span class="icon">🗑️</span> Очистить всё
+                </button>
+            </div>
+        </main>
+
+        <section class="table-display">
+            <table class="data-table" id="mainTable"></table>
+        </section>
+
+        <aside class="info-section">
+            <h2 class="info-title">💡 Возможности редактора</h2>
+            <ul class="feature-list">
+                <li class="feature-item">Редактирование ячеек в реальном времени</li>
+                <li class="feature-item">Экспорт данных в Excel формат</li>
+                <li class="feature-item">Настраиваемые заголовки и названия</li>
+                <li class="feature-item">Адаптивный дизайн для всех устройств</li>
+                <li class="feature-item">Быстрое создание и очистка таблиц</li>
+                <li class="feature-item">Поддержка русского языка</li>
+            </ul>
+        </aside>
+    </div>
+
+    <script>
+        function generateTable() {
+            const cols = parseInt(document.getElementById('tableColumns').value) || 4;
+            const rows = parseInt(document.getElementById('tableRows').value) || 5;
+            const table = document.getElementById('mainTable');
+            const colText = document.getElementById('columnHeaders').value;
+            const rowText = document.getElementById('rowTitles').value;
+            
+            table.innerHTML = '';
+            
+            const colNames = colText ? colText.split(',').map(name => name.trim()) : [];
+            const rowNames = rowText ? rowText.split(',').map(name => name.trim()) : [];
+            
+            const headerRow = table.insertRow();
+            const cornerCell = document.createElement('th');
+            cornerCell.textContent = '';
+            cornerCell.className = 'table-corner';
+            headerRow.appendChild(cornerCell);
+            
+            for (let i = 0; i < cols; i++) {
+                const th = document.createElement('th');
+                th.textContent = colNames[i] || Колонка ${i + 1};
+                th.contentEditable = true;
+                th.className = 'table-header';
+                headerRow.appendChild(th);
+            }
+            
+            for (let i = 0; i < rows; i++) {
+                const tr = table.insertRow();
+                const rowHeader = tr.insertCell();
+                rowHeader.textContent = rowNames[i] || Строка ${i + 1};
+                rowHeader.contentEditable = true;
+                rowHeader.className = 'table-row-header';
+                
+                for (let j = 0; j < cols; j++) {
+                    const cell = tr.insertCell();
+                    cell.contentEditable = true;
+                    cell.textContent = '';
+                    cell.className = 'table-cell';
+                }
+            }
+        }
+function downloadTable() {
+            const table = document.getElementById('mainTable');
+            const tableName = document.getElementById('tableName').value || 'МояТаблица';
+            
+            if (!table.rows.length) {
+                alert('Сначала создайте таблицу!');
+                return;
+            }
+            
+            let csvData = [];
+            csvData.push([tableName]);
+            csvData.push([]);
+            
+            for (let i = 0; i < table.rows.length; i++) {
+                let rowData = [];
+                const cells = table.rows[i].cells;
+                
+                for (let j = 0; j < cells.length; j++) {
+                    let cellValue = cells[j].textContent;
+                    cellValue = cellValue.replace(/"/g, '""');
+                    
+                    if (cellValue.includes(',')  cellValue.includes('\n')) {
+                        cellValue = '"' + cellValue + '"';
+                    }
+                    
+                    rowData.push(cellValue);
+                }
+                csvData.push(rowData.join(','));
+            }
+            
+            const csvContent = csvData.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.href = url;
+            link.download = tableName + '.csv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert(Таблица "${tableName}" успешно сохранена!);
+        }
+
+        function clearAll() {
+            if (confirm('Вы уверены, что хотите очистить всю таблицу?')) {
+                document.getElementById('mainTable').innerHTML = '';
+                document.getElementById('tableName').value = '';
+                document.getElementById('columnHeaders').value = '';
+                document.getElementById('rowTitles').value = '';
+                document.getElementById('tableColumns').value = '4';
+                document.getElementById('tableRows').value = '5';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', generateTable);
+    </script>
+</body>
+</html>
