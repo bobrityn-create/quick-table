@@ -5,231 +5,158 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Table Editor</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: Arial, sans-serif;
-            background: #f0f2f5;
-            min-height: 100vh;
-            padding: 20px;
+            margin: 20px;
+            background: #f5f5f5;
         }
-
         .container {
             max-width: 1200px;
             margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        .main-card {
             background: white;
-            border-radius: 10px;
             padding: 20px;
+            border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
         }
-
-        .controls {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        label {
-            font-weight: 600;
-            margin-bottom: 5px;
+        h1 {
+            text-align: center;
             color: #333;
         }
-
+        .controls {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .control-group {
+            margin: 10px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
         input {
-            padding: 10px;
+            padding: 8px;
+            width: 200px;
             border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
+            border-radius: 4px;
         }
-
-        .buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
         button {
-            padding: 12px 20px;
+            padding: 10px 20px;
+            margin: 5px;
             border: none;
-            border-radius: 5px;
-            font-size: 14px;
-            font-weight: 600;
+            border-radius: 4px;
             cursor: pointer;
-            flex: 1;
-            min-width: 120px;
+            font-size: 14px;
         }
-
-        .btn-create {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-export {
-            background: #007bff;
-            color: white;
-        }
-
-        .btn-clear {
-            background: #dc3545;
-            color: white;
-        }
-
-        .table-container {
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            overflow-x: auto;
-        }
-
+        .btn-create { background: #4CAF50; color: white; }
+        .btn-export { background: #2196F3; color: white; }
+        .btn-clear { background: #f44336; color: white; }
         #editableTable {
             width: 100%;
             border-collapse: collapse;
-            min-width: 500px;
+            margin-top: 20px;
         }
-
-        #editableTable th,
-        #editableTable td {
+        #editableTable th, #editableTable td {
             border: 1px solid #ddd;
-            padding: 12px;
+            padding: 10px;
             text-align: left;
-            min-width: 100px;
         }
-
         .column-header {
-            background: #007bff;
+            background: #2196F3;
             color: white;
-            font-weight: 600;
         }
-
         .row-header {
-            background: #28a745;
+            background: #4CAF50;
             color: white;
-            font-weight: 600;
         }
-
         .data-cell {
-            background: #f8f9fa;
-        }
-
-        .data-cell:focus {
-            background: #fff9c4;
-            outline: 2px solid #ffd54f;
+            background: #f9f9f9;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Редактор таблиц</h1>
-        </div>
-
-        <div class="main-card">
-            <div class="controls">
-                <div class="control-group">
-                    <label>Колонки:</label>
-                    <input type="number" id="columns" value="3" min="1" max="10">
-                </div>
-                
-                <div class="control-group">
-                    <label>Строки:</label>
-                    <input type="number" id="rows" value="3" min="1" max="20">
-                </div>
-                
-                <div class="control-group">
-                    <label>Название таблицы:</label>
-<input type="text" id="tableTitle" placeholder="Название">
-                </div>
-                
-                <div class="control-group">
-                    <label>Названия колонок:</label>
-                    <input type="text" id="columnNames" placeholder="Через запятую">
-                </div>
-                
-                <div class="control-group">
-                    <label>Названия строк:</label>
-                    <input type="text" id="rowNames" placeholder="Через запятую">
-                </div>
+        <h1>Редактор таблиц</h1>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label>Колонки:</label>
+                <input type="number" id="columns" value="3" min="1" max="10">
             </div>
-
-            <div class="buttons">
-                <button class="btn-create" id="createBtn">Создать таблицу</button>
-                <button class="btn-export" id="exportBtn">Экспорт в Excel</button>
-                <button class="btn-clear" id="clearBtn">Очистить всё</button>
+            <div class="control-group">
+                <label>Строки:</label>
+                <input type="number" id="rows" value="3" min="1" max="20">
             </div>
+            <div class="control-group">
+                <label>Название таблицы:</label>
+                <input type="text" id="tableTitle" placeholder="Название">
+            </div>
+            <div class="control-group">
+                <label>Названия колонок (через запятую):</label>
+                <input type="text" id="columnNames" placeholder="Имя, Возраст, Город">
+            </div>
+            <div class="control-group">
+                <label>Названия строк (через запятую):</label>
+                <input type="text" id="rowNames" placeholder="Иван, Мария, Петр">
+            </div>
+            
+            <button class="btn-create" id="createBtn">Создать таблицу</button>
+            <button class="btn-export" id="exportBtn">Экспорт в Excel</button>
+            <button class="btn-clear" id="clearBtn">Очистить всё</button>
         </div>
 
-        <div class="table-container">
-            <table id="editableTable"></table>
-        </div>
+        <table id="editableTable"></table>
     </div>
 
     <script>
-        // Функция создания таблицы
         function createTable() {
-            const columns = parseInt(document.getElementById('columns').value) || 3;
-            const rows = parseInt(document.getElementById('rows').value) || 3;
-            const table = document.getElementById('editableTable');
-            const columnNamesInput = document.getElementById('columnNames').value;
-            const rowNamesInput = document.getElementById('rowNames').value;
+            var columns = parseInt(document.getElementById('columns').value) || 3;
+            var rows = parseInt(document.getElementById('rows').value) || 3;
+            var table = document.getElementById('editableTable');
+            var columnNamesInput = document.getElementById('columnNames').value;
+            var rowNamesInput = document.getElementById('rowNames').value;
+table.innerHTML = '';
             
-            table.innerHTML = '';
+            var columnNames = [];
+            if (columnNamesInput) {
+                var names = columnNamesInput.split(',');
+                for (var i = 0; i < names.length; i++) {
+                    columnNames.push(names[i].trim());
+                }
+            }
             
-            const columnNames = columnNamesInput ? columnNamesInput.split(',').map(function(name) { 
-                return name.trim(); 
-            }) : [];
+            var rowNames = [];
+            if (rowNamesInput) {
+                var names = rowNamesInput.split(',');
+                for (var i = 0; i < names.length; i++) {
+                    rowNames.push(names[i].trim());
+                }
+            }
             
-            const rowNames = rowNamesInput ? rowNamesInput.split(',').map(function(name) { 
-                return name.trim(); 
-            }) : [];
-            
-            const headerRow = table.insertRow();
-            const emptyHeader = document.createElement('th');
+            var headerRow = table.insertRow();
+            var emptyHeader = document.createElement('th');
             emptyHeader.textContent = '';
             headerRow.appendChild(emptyHeader);
             
-            for (let i = 0; i < columns; i++) {
-                const th = document.createElement('th');
+            for (var i = 0; i < columns; i++) {
+                var th = document.createElement('th');
                 th.textContent = columnNames[i] || 'Колонка ' + (i + 1);
                 th.contentEditable = true;
                 th.className = 'column-header';
                 headerRow.appendChild(th);
             }
             
-            for (let i = 0; i < rows; i++) {
-                const row = table.insertRow();
-                const rowHeader = row.insertCell();
+            for (var i = 0; i < rows; i++) {
+                var row = table.insertRow();
+                var rowHeader = row.insertCell();
                 rowHeader.textContent = rowNames[i] || 'Строка ' + (i + 1);
                 rowHeader.contentEditable = true;
                 rowHeader.className = 'row-header';
                 
-                for (let j = 0; j < columns; j++) {
-                    const cell = row.insertCell();
+                for (var j = 0; j < columns; j++) {
+                    var cell = row.insertCell();
                     cell.contentEditable = true;
                     cell.textContent = '';
                     cell.className = 'data-cell';
@@ -237,40 +164,40 @@
             }
         }
 
-        // Функция экспорта
         function exportToExcel() {
-            const table = document.getElementById('editableTable');
-            const tableTitle = document.getElementById('tableTitle').value || 'Таблица';
+            var table = document.getElementById('editableTable');
+            var tableTitle = document.getElementById('tableTitle').value || 'Таблица';
             
             if (!table.rows.length) {
                 alert('Таблица пустая!');
                 return;
             }
             
-            let csv = [];
+            var csv = [];
             csv.push([tableTitle]);
             csv.push([]);
             
-            for (let i = 0; i < table.rows.length; i++) {
-                let row = [];
-                const cells = table.rows[i].cells;
+            for (var i = 0; i < table.rows.length; i++) {
+                var row = [];
+                var cells = table.rows[i].cells;
                 
-                for (let j = 0; j < cells.length; j++) {
-                    let cellContent = cells[j].textContent;
-                    cellContent = cellContent.replace(/"/g, '""');
-if (cellContent.indexOf(',') >= 0  cellContent.indexOf('\n') >= 0) {
-                        cellContent = '"' + cellContent + '"';
+                for (var j = 0; j < cells.length; j++) {
+                    var content = cells[j].textContent;
+                    content = content.replace(/"/g, '""');
+                    
+                    if (content.indexOf(',') >= 0  content.indexOf('\n') >= 0) {
+                        content = '"' + content + '"';
                     }
                     
-                    row.push(cellContent);
+                    row.push(content);
                 }
                 csv.push(row.join(','));
             }
             
-            const csvContent = csv.join('\n');
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
+            var csvContent = csv.join('\n');
+            var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            var link = document.createElement('a');
+            var url = URL.createObjectURL(blob);
             
             link.setAttribute('href', url);
             link.setAttribute('download', tableTitle + '.csv');
@@ -279,10 +206,9 @@ if (cellContent.indexOf(',') >= 0  cellContent.indexOf('\n') >= 0) {
             link.click();
             document.body.removeChild(link);
             
-            alert('Таблица экспортирована в CSV файл!');
+            alert('Таблица экспортирована!');
         }
 
-        // Функция очистки
         function clearTable() {
             if (confirm('Очистить всю таблицу?')) {
                 document.getElementById('editableTable').innerHTML = '';
@@ -293,11 +219,8 @@ if (cellContent.indexOf(',') >= 0  cellContent.indexOf('\n') >= 0) {
                 document.getElementById('rows').value = '3';
             }
         }
-
-        // Назначаем обработчики событий
-        document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
             createTable();
-            
             document.getElementById('createBtn').addEventListener('click', createTable);
             document.getElementById('exportBtn').addEventListener('click', exportToExcel);
             document.getElementById('clearBtn').addEventListener('click', clearTable);
