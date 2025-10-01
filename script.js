@@ -1,197 +1,244 @@
-function exportToExcel() {
-    try {
-        const table = document.getElementById('editableTable');
-        const tableTitle = document.getElementById('tableTitle').value || 'Таблица';
+> Fertyni:
+// Глобальные переменные для управления таблицей
+let currentTable = null;
+let isResizing = false;
+let currentCol = null;
+let startX = 0;
+let startWidth = 0;
 
-        if (!table.rows.length) {
-            alert('Таблица пустая! Сначала создайте таблицу.');
-            return;
-        }
-
-        // Создаем XML для Excel
-        let xmlContent = '<?xml version="1.0"?>\n';
-        xmlContent += '<?mso-application progid="Excel.Sheet"?>\n';
-        xmlContent += '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"\n';
-        xmlContent += ' xmlns:o="urn:schemas-microsoft-com:office:office"\n';
-        xmlContent += ' xmlns:x="urn:schemas-microsoft-com:office:excel"\n';
-        xmlContent += ' xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"\n';
-        xmlContent += ' xmlns:html="http://www.w3.org/TR/REC-html40">\n';
-        xmlContent += '<Worksheet ss:Name="' + tableTitle + '">\n';
-        xmlContent += '<Table>\n';
-
-        // Добавляем строки таблицы
-        for (let i = 0; i < table.rows.length; i++) {
-            xmlContent += '<Row>\n';
-            const cells = table.rows[i].cells;
+function createTable() {
+    const columns = parseInt(document.getElementById('columns').value) || 3;
+    const rows = parseInt(document.getElementById('rows').value) || 3;
+    const table = document.getElementById('editableTable');
+    
+    // Очищаем таблицу
+    table.innerHTML = '';
+    currentTable = table;
+    
+    // Создаем строку заголовков с возможностью изменения размера
+    const headerRow = table.insertRow();
+    headerRow.className = 'table-header';
+    
+    for (let i = 0; i < columns; i++) {
+        const th = document.createElement('th');
+        th.innerHTML = 
+            <div class="col-header">
+                <span>Колонка ${i + 1}</span>
+                <div class="resize-handle"></div>
+            </div>
+        ;
+        th.contentEditable = true;
+        
+        // Добавляем обработчики для изменения размера
+        const resizeHandle = th.querySelector('.resize-handle');
+        resizeHandle.addEventListener('mousedown', (e) => startResize(e, i));
+        
+        headerRow.appendChild(th);
+    }
+    
+    // Создаем строки с данными
+    for (let i = 0; i < rows; i++) {
+        const row = table.insertRow();
+        for (let j = 0; j < columns; j++) {
+            const cell = row.insertCell();
+            cell.contentEditable = true;
+            cell.dataset.formula = '';
+            cell.textContent = '';
             
-            for (let j = 0; j < cells.length; j++) {
-                let cellValue = cells[j].textContent || '';
-                // Экранируем специальные XML символы
-                cellValue = cellValue.replace(/&/g, '&amp;')
-                                    .replace(/</g, '&lt;')
-                                    .replace(/>/g, '&gt;')
-                                    .replace(/"/g, '&quot;')
-                                    .replace(/'/g, '&apos;');
-                
-                xmlContent += '<Cell><Data ss:Type="String">' + cellValue + '</Data></Cell>\n';
+            // Обработчик для ввода формул
+            cell.addEventListener('input', handleCellInput);
+            cell.addEventListener('blur', calculateFormulas);
+            
+            // Подсказка при фокусе
+            cell.addEventListener('focus', function() {
+                if (this.dataset.formula) {
+                    this.title = Формула: ${this.dataset.formula};
+                }
+            });
+        }
+    }
+    
+    initResizeEvents();
+}
+
+// Функция для начала изменения размера колонки
+function startResize(e, colIndex) {
+    isResizing = true;
+    currentCol = colIndex;
+    startX = e.clientX;
+    startWidth = currentTable.rows[0].cells[colIndex].offsetWidth;
+    
+    e.preventDefault();
+    document.addEventListener('mousemove', handleResize);
+    document.addEventListener('mouseup', stopResize);
+}
+
+function handleResize(e) {
+    if (!isResizing) return;
+    
+    const width = startWidth + (e.clientX - startX);
+    if (width > 50) { // Минимальная ширина 50px
+        currentTable.rows[0].cells[currentCol].style.width = width + 'px';
+        
+        // Применяем ширину ко всем ячейкам в колонке
+        for (let i = 1; i < currentTable.rows.length; i++) {
+            currentTable.rows[i].cells[currentCol].style.width = width + 'px';
+        }
+    }
+}
+
+function stopResize() {
+    isResizing = false;
+    document.removeEventListener('mousemove', handleResize);
+    document.removeEventListener('mouseup', stopResize);
+}
+
+function initResizeEvents() {
+    document.addEventListener('mousemove', handleResize);
+    document.addEventListener('mouseup', stopResize);
+}
+
+// Обработчик ввода в ячейку (для формул)
+function handleCellInput(e) {
+    const cell = e.target;
+    const value = cell.textContent.trim();
+    
+    // Проверяем, является ли ввод формулой (начинается с =)
+    if (value.startsWith('=')) {
+        cell.dataset.formula = value;
+        cell.classList.add('formula-cell');
+    } else {
+        cell.dataset.formula = '';
+        cell.classList.remove('formula-cell');
+    }
+}
+
+// Вычисление формул
+function calculateFormulas() {
+    if (!currentTable) return;
+    
+    const rows = currentTable.rows;
+    
+    for (let i = 1; i < rows.length; i++) {
+        for (let j = 0; j < rows[i].cells.length; j++) {
+            const cell = rows[i].cells[j];
+
+> Fertyni:
+const formula = cell.dataset.formula;
+            
+            if (formula && formula.startsWith('=')) {
+                try {
+                    const result = evaluateFormula(formula, i, j);
+                    if (result !== null) {
+                        // Сохраняем оригинальную формулу в data-атрибуте
+                        cell.dataset.originalText = cell.textContent;
+                        cell.textContent = result;
+                    }
+                } catch (error) {
+                    cell.textContent = '#ОШИБКА!';
+                }
             }
-            xmlContent += '</Row>\n';
         }
-
-        xmlContent += '</Table>\n';
-        xmlContent += '</Worksheet>\n';
-        xmlContent += '</Workbook>';
-
-        // Создаем и скачиваем файл
-        const blob = new Blob([xmlContent], { type: 'application/vnd.ms-excel' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-
-        link.setAttribute('href', url);
-        link.setAttribute('download', tableTitle + '.xls');
-        link.style.visibility = 'hidden';
-
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        alert('Таблица "' + tableTitle + '" успешно экспортирована в Excel!');
-
-    } catch (error) {
-        console.error('Ошибка экспорта:', error);
-        alert('Ошибка при экспорте: ' + error.message);
-    }
-}
-// Управление подпиской и пробным периодом
-let trialTimeLeft = 60; // 1 минут в секундах
-let isTrialActive = false;
-let isPremium = false;
-
-function startTrial() {
-    isTrialActive = true;
-    trialTimeLeft = 60; // 1 минут
-    localStorage.setItem('trialStart', Date.now().toString());
-    localStorage.setItem('trialActive', 'true');
-    hideSubscriptionModal();
-    startTrialTimer();
-    updateUI();
-}
-
-function subscribe() {
-    // Здесь интеграция с платежной системой
-    isPremium = true;
-    isTrialActive = false;
-    localStorage.setItem('premium', 'true');
-    hideSubscriptionModal();
-    updateUI();
-    alert('🎉 Спасибо за покупку подписки! Теперь все функции доступны!');
-}
-
-function showSubscriptionModal() {
-    document.getElementById('subscriptionModal').style.display = 'flex';
-}
-
-function hideSubscriptionModal() {
-    document.getElementById('subscriptionModal').style.display = 'none';
-}
-
-function startTrialTimer() {
-    const timerElement = document.getElementById('trialTimer');
-    const trialBanner = document.getElementById('trialInfo');
-    
-    trialBanner.style.display = 'flex';
-    
-    const timer = setInterval(() => {
-        if (trialTimeLeft <= 0) {
-            clearInterval(timer);
-            trialBanner.style.display = 'none';
-            isTrialActive = false;
-            showSubscriptionModal();
-            return;
-        }
-        
-        const minutes = Math.floor(trialTimeLeft / 60);
-        const seconds = trialTimeLeft % 60;
-        timerElement.textContent = ${minutes}:${seconds.toString().padStart(2, '0')};
-        trialTimeLeft--;
-    }, 1000);
-}
-
-function checkTrialStatus() {
-    const trialStart = localStorage.getItem('trialStart');
-    const trialActive = localStorage.getItem('trialActive');
-    const premium = localStorage.getItem('premium');
-    
-    if (premium === 'true') {
-        isPremium = true;
-        return;
-    }
-    
-    if (trialActive === 'true' && trialStart) {
-        const timePassed = Math.floor((Date.now() - parseInt(trialStart)) / 1000);
-        trialTimeLeft = Math.max(0, 600 - timePassed);
-        
-        if (trialTimeLeft > 0) {
-            isTrialActive = true;
-            startTrialTimer();
-        } else {
-            showSubscriptionModal();
-        }
-    } else {
-        showSubscriptionModal();
     }
 }
 
-function updateUI() {
-    const exportBtn = document.getElementById('exportBtn');
+// Функция вычисления простых формул
+function evaluateFormula(formula, rowIndex, colIndex) {
+    // Убираем знак = и пробелы
+    let expr = formula.substring(1).replace(/\s/g, '');
     
-    if (isPremium || isTrialActive) {
-        exportBtn.disabled = false;
-        exportBtn.style.opacity = '1';
-    } else {
-        exportBtn.disabled = true;
-        exportBtn.style.opacity = '0.6';
-    }
-}
-
-// Модифицируем функцию экспорта для проверки подписки
-function exportToExcel() {
-    if (!isPremium && !isTrialActive) {
-        showSubscriptionModal();
-        return;
+    // Поддерживаемые операции: СУММ(), СРЗНАЧ(), +, -, *, /
+    
+    // Обработка СУММ(A1:A5)
+    if (expr.toUpperCase().startsWith('СУММ(')) {
+        const range = expr.match(/СУММ\(([^)]+)\)/i)[1];
+        return sumRange(range, rowIndex);
     }
     
-    // Твоя существующая функция экспорта
+    // Обработка СРЗНАЧ(A1:A5)
+    if (expr.toUpperCase().startsWith('СРЗНАЧ(')) {
+        const range = expr.match(/СРЗНАЧ\(([^)]+)\)/i)[1];
+        return averageRange(range, rowIndex);
+    }
+    
+    // Простые арифметические операции
     try {
-        const table = document.getElementById('editableTable');
-        const tableTitle = document.getElementById('tableTitle').value || 'Таблица';
-
-        if (!table.rows.length) {
-            alert('Таблица пустая! Сначала создайте таблицу.');
-            return;
-        }
-
-        // ... остальной код экспорта ...
+        // Заменяем ссылки на ячейки их значениями
+        expr = expr.replace(/[A-Z](\d+)/gi, (match) => {
+            return getCellValue(match, rowIndex);
+        });
         
+        // Вычисляем выражение
+        const result = eval(expr);
+        return isNaN(result) ? null : Math.round(result * 100) / 100;
     } catch (error) {
-        console.error('Ошибка экспорта:', error);
-        alert('Ошибка при экспорте: ' + error.message);
+        return null;
     }
 }
 
-// Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', function() {
-    checkTrialStatus();
-    updateUI();
+// Получение значения ячейки по ссылке (например, A1)
+function getCellValue(cellRef, currentRow) {
+    if (!currentTable) return 0;
     
-    // Закрытие модального окна
-    document.querySelector('.close').addEventListener('click', hideSubscriptionModal);
+    const colLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const colChar = cellRef.charAt(0).toUpperCase();
+    const rowNum = parseInt(cellRef.substring(1)) - 1; // -1 потому что первая строка это заголовок
     
-    // Закрытие при клике вне модального окна
-    window.addEventListener('click', function(event) {
-        const modal = document.getElementById('subscriptionModal');
-        if (event.target === modal) {
-            hideSubscriptionModal();
+    const colIndex = colLetters.indexOf(colChar);
+    
+    if (colIndex >= 0 && rowNum >= 0 && currentTable.rows[rowNum + 1]) {
+        const cell = currentTable.rows[rowNum + 1].cells[colIndex];
+        const value = parseFloat(cell.textContent) || 0;
+        return value;
+    }
+    
+    return 0;
+}
+
+// Сумма диапазона
+function sumRange(range, currentRow) {
+    const [start, end] = range.split(':');
+    let sum = 0;
+    let count = 0;
+    
+    const startCol = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.indexOf(start.charAt(0).toUpperCase());
+    const endCol = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.indexOf(end.charAt(0).toUpperCase());
+    const startRow = parseInt(start.substring(1)) - 1;
+    const endRow = parseInt(end.substring(1)) - 1;
+    
+    for (let row = startRow; row <= endRow; row++) {
+        for (let col = startCol; col <= endCol; col++) {
+            if (currentTable.rows[row + 1] && currentTable.rows[row + 1].cells[col]) {
+                const value = parseFloat(currentTable.rows[row + 1].cells[col].textContent) || 0;
+                sum += value;
+                count++;
+            }
         }
-    });
-});
+    }
+    
+    return count > 0 ? sum : 0;
+}
+
+// Среднее значение диапазона
+function averageRange(range, currentRow) {
+    const [start, end] = range.split(':');
+    let sum = 0;
+    let count = 0;
+    
+    const startCol = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.indexOf(start.charAt(0).toUpperCase());
+    const endCol = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.indexOf(end.charAt(0).toUpperCase());
+    const startRow = parseInt(start.substring(1)) - 1;
+    const endRow = parseInt(end.substring(1)) - 1;
+    
+    for (let row = startRow; row <= endRow; row++) {
+        for (let col = startCol; col <= endCol; col++) {
+            if (currentTable.rows[row + 1] && currentTable.rows[row + 1].cells[col]) {
+                const value = parseFloat(currentTable.rows[row + 1].cells[col].textContent) || 0;
+                sum += value;
+                count++;
+            }
+        }
+    }
+    
+    return count > 0 ? Math.round((sum / count) * 100) / 100 : 0;
+}
