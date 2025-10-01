@@ -49,7 +49,6 @@ function createTable() {
     cellsProcessed += columns * rows;
     updateStats();
     updateTableSize();
-}> Fertyni:
 // Глобальные переменные для управления таблицей
 let currentTable = null;
 let isResizing = false;
