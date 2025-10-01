@@ -1,4 +1,55 @@
-> Fertyni:
+// Анимации и статистика
+let tablesCreated = 0;
+let cellsProcessed = 0;
+let exportsCompleted = 0;
+
+function updateStats() {
+    document.getElementById('tableCount').textContent = tablesCreated;
+    document.getElementById('cellCount').textContent = cellsProcessed;
+    document.getElementById('exportCount').textContent = exportsCompleted;
+}
+
+function changeColumns(delta) {
+    const input = document.getElementById('columns');
+    const newValue = parseInt(input.value) + delta;
+    if (newValue >= parseInt(input.min) && newValue <= parseInt(input.max)) {
+        input.value = newValue;
+        updateTableSize();
+    }
+}
+
+function changeRows(delta) {
+    const input = document.getElementById('rows');
+    const newValue = parseInt(input.value) + delta;
+    if (newValue >= parseInt(input.min) && newValue <= parseInt(input.max)) {
+        input.value = newValue;
+        updateTableSize();
+    }
+}
+
+function updateTableSize() {
+    const columns = document.getElementById('columns').value;
+    const rows = document.getElementById('rows').value;
+    document.getElementById('tableSize').textContent = ${columns}×${rows};
+}
+
+// Обнови функцию createTable() для подсчета статистики
+function createTable() {
+    const columns = parseInt(document.getElementById('columns').value) || 3;
+    const rows = parseInt(document.getElementById('rows').value) || 3;
+    const table = document.getElementById('editableTable');
+    
+    table.innerHTML = '';
+    currentTable = table;
+    
+    // Создание таблицы...
+    
+    // Обновляем статистику
+    tablesCreated++;
+    cellsProcessed += columns * rows;
+    updateStats();
+    updateTableSize();
+}> Fertyni:
 // Глобальные переменные для управления таблицей
 let currentTable = null;
 let isResizing = false;
