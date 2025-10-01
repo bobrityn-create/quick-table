@@ -61,7 +61,7 @@ function createTable() {
     initResizeEvents();
 }
 
-// Функция для начала изменения размера колонки
+// Функции для изменения размера колонок (остаются без изменений)
 function startResize(e, colIndex) {
     isResizing = true;
     currentCol = colIndex;
@@ -77,10 +77,9 @@ function handleResize(e) {
     if (!isResizing) return;
     
     const width = startWidth + (e.clientX - startX);
-    if (width > 50) { // Минимальная ширина 50px
+    if (width > 50) {
         currentTable.rows[0].cells[currentCol].style.width = width + 'px';
         
-        // Применяем ширину ко всем ячейкам в колонке
         for (let i = 1; i < currentTable.rows.length; i++) {
             currentTable.rows[i].cells[currentCol].style.width = width + 'px';
         }
@@ -103,7 +102,6 @@ function handleCellInput(e) {
     const cell = e.target;
     const value = cell.textContent.trim();
     
-    // Проверяем, является ли ввод формулой (начинается с =)
     if (value.startsWith('=')) {
         cell.dataset.formula = value;
         cell.classList.add('formula-cell');
@@ -113,7 +111,7 @@ function handleCellInput(e) {
     }
 }
 
-// Вычисление формул
+// Вычисление формул (остается без изменений)
 function calculateFormulas() {
     if (!currentTable) return;
     
@@ -122,15 +120,13 @@ function calculateFormulas() {
     for (let i = 1; i < rows.length; i++) {
         for (let j = 0; j < rows[i].cells.length; j++) {
             const cell = rows[i].cells[j];
+            const formula = cell.dataset.formula;
 
 > Fertyni:
-const formula = cell.dataset.formula;
-            
-            if (formula && formula.startsWith('=')) {
+if (formula && formula.startsWith('=')) {
                 try {
                     const result = evaluateFormula(formula, i, j);
                     if (result !== null) {
-                        // Сохраняем оригинальную формулу в data-атрибуте
                         cell.dataset.originalText = cell.textContent;
                         cell.textContent = result;
                     }
@@ -142,33 +138,25 @@ const formula = cell.dataset.formula;
     }
 }
 
-// Функция вычисления простых формул
+// Функция вычисления простых формул (остается без изменений)
 function evaluateFormula(formula, rowIndex, colIndex) {
-    // Убираем знак = и пробелы
     let expr = formula.substring(1).replace(/\s/g, '');
     
-    // Поддерживаемые операции: СУММ(), СРЗНАЧ(), +, -, *, /
-    
-    // Обработка СУММ(A1:A5)
     if (expr.toUpperCase().startsWith('СУММ(')) {
         const range = expr.match(/СУММ\(([^)]+)\)/i)[1];
         return sumRange(range, rowIndex);
     }
     
-    // Обработка СРЗНАЧ(A1:A5)
     if (expr.toUpperCase().startsWith('СРЗНАЧ(')) {
         const range = expr.match(/СРЗНАЧ\(([^)]+)\)/i)[1];
         return averageRange(range, rowIndex);
     }
     
-    // Простые арифметические операции
     try {
-        // Заменяем ссылки на ячейки их значениями
         expr = expr.replace(/[A-Z](\d+)/gi, (match) => {
             return getCellValue(match, rowIndex);
         });
         
-        // Вычисляем выражение
         const result = eval(expr);
         return isNaN(result) ? null : Math.round(result * 100) / 100;
     } catch (error) {
@@ -176,13 +164,13 @@ function evaluateFormula(formula, rowIndex, colIndex) {
     }
 }
 
-// Получение значения ячейки по ссылке (например, A1)
+// Вспомогательные функции для формул (остаются без изменений)
 function getCellValue(cellRef, currentRow) {
     if (!currentTable) return 0;
     
     const colLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const colChar = cellRef.charAt(0).toUpperCase();
-    const rowNum = parseInt(cellRef.substring(1)) - 1; // -1 потому что первая строка это заголовок
+    const rowNum = parseInt(cellRef.substring(1)) - 1;
     
     const colIndex = colLetters.indexOf(colChar);
     
@@ -195,7 +183,6 @@ function getCellValue(cellRef, currentRow) {
     return 0;
 }
 
-// Сумма диапазона
 function sumRange(range, currentRow) {
     const [start, end] = range.split(':');
     let sum = 0;
@@ -219,7 +206,6 @@ function sumRange(range, currentRow) {
     return count > 0 ? sum : 0;
 }
 
-// Среднее значение диапазона
 function averageRange(range, currentRow) {
     const [start, end] = range.split(':');
     let sum = 0;
@@ -241,4 +227,146 @@ function averageRange(range, currentRow) {
     }
     
     return count > 0 ? Math.round((sum / count) * 100) / 100 : 0;
+}
+
+// НОВАЯ ФУНКЦИЯ: Экспорт в Excel
+function exportToExcel() {
+    if (!currentTable || currentTable.rows.length === 0) {
+        alert('Сначала создайте таблицу!');
+        return;
+    }
+
+    try {
+        // Создаем рабочую книгу
+        const workbook = XLSX.utils.book_new();
+        const worksheetData = [];
+
+> Fertyni:
+// Добавляем заголовки
+        const headerRow = [];
+        for (let i = 0; i < currentTable.rows[0].cells.length; i++) {
+            headerRow.push(currentTable.rows[0].cells[i].textContent || Колонка ${i + 1});
+        }
+        worksheetData.push(headerRow);
+
+        // Добавляем данные
+        for (let i = 1; i < currentTable.rows.length; i++) {
+            const row = currentTable.rows[i];
+            const rowData = [];
+            
+            for (let j = 0; j < row.cells.length; j++) {
+                const cell = row.cells[j];
+                let cellValue = cell.textContent;
+                
+                // Обрабатываем числовые значения
+                if (cellValue && !isNaN(cellValue) && cellValue.trim() !== '') {
+                    cellValue = parseFloat(cellValue);
+                }
+                
+                rowData.push(cellValue || '');
+            }
+            worksheetData.push(rowData);
+        }
+
+        // Создаем worksheet
+        const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+
+        // Настраиваем ширину колонок
+        const colWidths = [];
+        for (let i = 0; i < currentTable.rows[0].cells.length; i++) {
+            const width = currentTable.rows[0].cells[i].offsetWidth;
+            colWidths.push({ wch: Math.max(8, width / 8) }); // Конвертируем пиксели в символы
+        }
+        worksheet['!cols'] = colWidths;
+
+        // Добавляем worksheet в workbook
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Таблица');
+
+        // Скачиваем файл
+        const fileName = table_export_${new Date().toISOString().slice(0, 10)}.xlsx;
+        XLSX.writeFile(workbook, fileName);
+        
+        showSuccess('Файл успешно экспортирован в Excel!');
+        
+    } catch (error) {
+        console.error('Ошибка при экспорте:', error);
+        alert('Произошла ошибка при экспорте. Проверьте консоль для подробностей.');
+    }
+}
+
+// Функция для показа успешного сообщения
+function showSuccess(message) {
+    // Создаем или находим контейнер для сообщений
+    let messageContainer = document.getElementById('message-container');
+    if (!messageContainer) {
+        messageContainer = document.createElement('div');
+        messageContainer.id = 'message-container';
+        messageContainer.style.cssText = 
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        ;
+        document.body.appendChild(messageContainer);
+    }
+
+    // Создаем сообщение
+    const messageEl = document.createElement('div');
+    messageEl.className = 'success-message';
+    messageEl.textContent = message;
+    messageEl.style.cssText = 
+        background: var(--success-color);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        box-shadow: var(--shadow);
+        animation: slideInRight 0.3s ease-out;
+    ;
+
+    messageContainer.appendChild(messageEl);
+
+    // Удаляем сообщение через 3 секунды
+    setTimeout(() => {
+        messageEl.style.animation = 'slideOutRight 0.3s ease-in';
+        setTimeout(() => {
+            if (messageEl.parentNode) {
+                messageEl.parentNode.removeChild(messageEl);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Добавляем стили для анимаций
+const style = document.createElement('style');
+style.textContent = 
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    @keyframes slideOutRight {
+        from {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+    }
+;
+document.head.appendChild(style);
+
+function clearTable() {
+    if (confirm('Очистить всю таблицу?')) {
+        document.getElementById('editableTable').innerHTML = '';
+        currentTable = null;
+    }
 }
