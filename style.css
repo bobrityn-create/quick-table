@@ -1,723 +1,253 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Редактор таблиц</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background: #f0f0f0;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        .controls {
-            margin: 20px 0;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 5px;
-        }
-        .control-group {
-            margin: 10px 0;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input {
-            padding: 8px;
-            width: 200px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        button {
-            padding: 10px 20px;
-            margin: 5px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .btn-create { background: #4CAF50; color: white; }
-        .btn-export { background: #2196F3; color: white; }
-        .btn-clear { background: #f44336; color: white; }
-        #editableTable {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        #editableTable th, #editableTable td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-        }
-        .column-header {
-            background: #2196F3;
-            color: white;
-        }
-        .row-header {
-            background: #4CAF50;
-            color: white;
-        }
-        .data-cell {
-            background: #f9f9f9;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Редактор таблиц</h1>
-        
-        <div class="controls">
-            <div class="control-group">
-                <label>Колонки:</label>
-                <input type="number" id="columns" value="3" min="1" max="10">
-            </div>
-            <div class="control-group">
-                <label>Строки:</label>
-                <input type="number" id="rows" value="3" min="1" max="20">
-            </div>
-            <div class="control-group">
-                <label>Название таблицы:</label>
-                <input type="text" id="tableTitle" placeholder="Название">
-            </div>
-            <div class="control-group">
-                <label>Названия колонок (через запятую):</label>
-                <input type="text" id="columnNames" placeholder="Имя, Возраст, Город">
-            </div>
-            <div class="control-group">
-                <label>Названия строк (через запятую):</label>
-                <input type="text" id="rowNames" placeholder="Иван, Мария, Петр">
-            </div>
-            
-            <button class="btn-create" id="createBtn">Создать таблицу</button>
-            <button class="btn-export" id="exportBtn">Экспорт в Excel</button>
-            <button class="btn-clear" id="clearBtn">Очистить всё</button>
-        </div>
-
-        <table id="editableTable"></table>
-    </div>
-
-    <script>
-        function createTable() {
-            var col = document.getElementById('columns');
-            var row = document.getElementById('rows');
-            var table = document.getElementById('editableTable');
-            var colNames = document.getElementById('columnNames');
-            var rowNames = document.getElementById('rowNames');
-            
-            var cols = parseInt(col.value) || 3;
-            var rows = parseInt(row.value) || 3;
-var colText = colNames.value;
-            var rowText = rowNames.value;
-            
-            table.innerHTML = '';
-            
-            var cNames = [];
-            if (colText) {
-                var parts = colText.split(',');
-                for (var i = 0; i < parts.length; i++) {
-                    cNames.push(parts[i].trim());
-                }
-            }
-            
-            var rNames = [];
-            if (rowText) {
-                var parts = rowText.split(',');
-                for (var i = 0; i < parts.length; i++) {
-                    rNames.push(parts[i].trim());
-                }
-            }
-            
-            var headRow = table.insertRow();
-            var emptyHead = document.createElement('th');
-            emptyHead.textContent = '';
-            headRow.appendChild(emptyHead);
-            
-            for (var i = 0; i < cols; i++) {
-                var th = document.createElement('th');
-                th.textContent = cNames[i] || 'Колонка ' + (i + 1);
-                th.contentEditable = true;
-                th.className = 'column-header';
-                headRow.appendChild(th);
-            }
-            
-            for (var i = 0; i < rows; i++) {
-                var tr = table.insertRow();
-                var rowHead = tr.insertCell();
-                rowHead.textContent = rNames[i] || 'Строка ' + (i + 1);
-                rowHead.contentEditable = true;
-                rowHead.className = 'row-header';
-                
-                for (var j = 0; j < cols; j++) {
-                    var cell = tr.insertCell();
-                    cell.contentEditable = true;
-                    cell.textContent = '';
-                    cell.className = 'data-cell';
-                }
-            }
-        }
-
-        function exportToExcel() {
-            var table = document.getElementById('editableTable');
-            var title = document.getElementById('tableTitle');
-            var tableName = title.value || 'Таблица';
-            
-            if (table.rows.length === 0) {
-                alert('Таблица пустая!');
-                return;
-            }
-            
-            var data = [];
-            data.push([tableName]);
-            data.push([]);
-            
-            for (var i = 0; i < table.rows.length; i++) {
-                var line = [];
-                var cells = table.rows[i].cells;
-                
-                for (var j = 0; j < cells.length; j++) {
-                    var text = cells[j].textContent;
-                    text = text.replace(/"/g, '""');
-                    
-                    if (text.indexOf(',') >= 0  text.indexOf('\n') >= 0) {
-                        text = '"' + text + '"';
-                    }
-                    
-                    line.push(text);
-                }
-                data.push(line.join(','));
-            }
-            
-            var csv = data.join('\n');
-            var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            var link = document.createElement('a');
-            var url = URL.createObjectURL(blob);
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', tableName + '.csv');
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            alert('Таблица экспортирована!');
-        }
-
-        function clearTable() {
-            if (confirm('Очистить всю таблицу?')) {
-                document.getElementById('editableTable').innerHTML = '';
-                document.getElementById('tableTitle').value = '';
-                document.getElementById('columnNames').value = '';
-                document.getElementById('rowNames').value = '';
-                document.getElementById('columns').value = '3';
-                document.getElementById('rows').value = '3';
-            }
-        }
-document.addEventListener('DOMContentLoaded', function() {
-            createTable();
-            document.getElementById('createBtn').addEventListener('click', createTable);
-            document.getElementById('exportBtn').addEventListener('click', exportToExcel);
-            document.getElementById('clearBtn').addEventListener('click', clearTable);
-        });
-    </script>
-</body>
-</html>
-function downloadTable() {
-    const table = document.getElementById('mainTable');
-    const tableName = document.getElementById('tableName').value || 'МояТаблица';
-    
-    if (!table.rows.length) {
-        alert('Сначала создайте таблицу!');
-        return;
-    }
-    
-    let csvData = [];
-    
-    // Собираем все строки таблицы
-    for (let i = 0; i < table.rows.length; i++) {
-        let rowData = [];
-        const cells = table.rows[i].cells;
-        
-        for (let j = 0; j < cells.length; j++) {
-            let cellValue = cells[j].textContent || '';
-            cellValue = cellValue.replace(/"/g, '""');
-            
-            // Все значения обрамляем в кавычки для надежности
-            cellValue = '"' + cellValue + '"';
-            
-            rowData.push(cellValue);
-        }
-        csvData.push(rowData.join(';')); // Используем точку с запятой для лучшей совместимости
-    }
-    
-    // Добавляем BOM для правильного отображения кириллицы в Excel
-    const BOM = '\uFEFF';
-    const csvContent = BOM + csvData.join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    
-    link.href = url;
-    link.download = tableName + '.csv';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    alert('Таблица "' + tableName + '" успешно сохранена!');
-}
-    <style>
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* Базовые стили для мобильных устройств */
+:root {
+    --primary-color: #667eea;
+    --primary-hover: #5a6fd8;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --warning-color: #f59e0b;
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+    --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
+}
+
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
-    padding: 15px;
-    font-size: 14px;
-}
-
-.app-container {
-    max-width: 100%;
-    margin: 0 auto;
-}
-
-.app-header {
-    text-align: center;
-    margin-bottom: 20px;
-    color: white;
-}
-
-.app-title {
-    font-size: 1.8rem;
-    margin-bottom: 10px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    word-wrap: break-word;
-}
-
-.app-subtitle {
-    font-size: 1rem;
-    opacity: 0.9;
-    line-height: 1.4;
-}
-
-.control-panel {
-    background: white;
-    border-radius: 15px;
     padding: 20px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
+    color: var(--text-primary);
 }
 
-.input-grid {
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    background: var(--card-bg);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 30px;
+    backdrop-filter: blur(10px);
+}
+
+/* Header Styles */
+header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+header h1 {
+    color: var(--text-primary);
+    font-size: 2.8em;
+    margin-bottom: 10px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary-color), #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+header p {
+    color: var(--text-secondary);
+    font-size: 1.2em;
+    font-weight: 400;
+}
+
+/* Controls Section */
+.controls {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 15px;
-    margin-bottom: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+    padding: 25px;
+    background: var(--bg-color);
+    border-radius: 15px;
+    border: 1px solid var(--border-color);
 }
 
-.input-card {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 12px;
-    border: 2px solid transparent;
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.input-label {
-    display: block;
+.input-group label {
     font-weight: 600;
-    color: #2d3748;
-    margin-bottom: 8px;
-    font-size: 0.9rem;
+    color: var(--text-primary);
+    font-size: 0.95em;
 }
 
-.form-control {
-    width: 100%;
+.input-group input {
     padding: 12px 15px;
-    border: 2px solid #e2e8f0;
+    border: 2px solid var(--border-color);
     border-radius: 10px;
-    font-size: 16px; /* Увеличиваем для удобства на мобильных */
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background: var(--card-bg);
 }
 
-.button-group {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
+.input-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.action-btn {
-    padding: 15px 20px;
+/* Buttons */
+button {
+    padding: 14px 28px;
+    background: var(--primary-color);
+    color: white;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
+    cursor: pointer;
     font-size: 16px;
     font-weight: 600;
-    cursor: pointer;
     transition: all 0.3s ease;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    width: 100%;
+    gap: 8px;
 }
 
-.table-container {
-    background: white;
-    border-radius: 15px;
-    padding: 15px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
+button:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
 }
 
-#editableTable {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 500px; /* Минимальная ширина для таблицы */
+button:active {
+    transform: translateY(0);
 }
 
-#editableTable th,
-#editableTable td {
-    border: 1px solid #ddd;
-    padding: 10px;
-    text-align: left;
-    font-size: 14px;
-}
-
-.column-header {
-    background: #2196F3;
-    color: white;
-    font-weight: 600;
-    min-width: 80px;
-}
-
-.row-header {
-    background: #4CAF50;
-    color: white;
-    font-weight: 600;
-    min-width: 80px;
-}
-
-.data-cell {
-    background: #f9f9f9;
-    min-width: 80px;
-}
-
-/* Стили для планшетов (768px и выше) */
-@media (min-width: 768px) {
-    body {
-        padding: 20px;
-        font-size: 16px;
-    }
-    
-    .app-title {
-        font-size: 2.5rem;
-    }
-    
-    .app-subtitle {
-        font-size: 1.2rem;
-    }
-    
-    .input-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-    }
-    
-    .button-group {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 15px;
-    }
-    
-    .action-btn {
-        padding: 18px 25px;
-    }
-    
-    .control-panel {
-        padding: 30px;
-    }
-    
-    .table-container {
-        padding: 20px;
-    }
-}
-
-/* Стили для десктопов (1024px и выше) */
-@media (min-width: 1024px) {
-    .app-container {
-        max-width: 1200px;
-    }
-    
-    .input-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-    
-    #editableTable th,
-    #editableTable td {
-        padding: 12px;
-        font-size: 16px;
-    }
-}
-
-/* Стили для очень больших экранов (1440px и выше) */
-@media (min-width: 1440px) {
-    .app-container {
-        max-width: 1400px;
-    }
-    
-    .input-grid {
-        grid-template-columns: repeat(5, 1fr);
-    }
-}
-
-/* Дополнительные улучшения для мобильных */
-@media (max-width: 480px) {
-    body {
-        padding: 10px;
-    }
-    
-    .app-title {
-        font-size: 1.5rem;
-    }
-    
-    .control-panel {
-padding: 15px;
-    }
-    
-    .input-card {
-        padding: 12px;
-    }
-    
-    .form-control {
-        padding: 10px 12px;
-    }
-    
-    .action-btn {
-        padding: 12px 15px;
-        font-size: 14px;
-    }
-    
-    #editableTable th,
-    #editableTable td {
-        padding: 8px;
-        font-size: 12px;
-    }
-}
-
-/* Улучшение скролла на мобильных */
-.table-container::-webkit-scrollbar {
-    height: 8px;
-}
-
-.table-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
-
-.table-container::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 10px;
-}
-
-.table-container::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-}
-
-/* Предотвращение масштабирования при фокусе на мобильных */
-.form-control {
-    font-size: 16px; /* Предотвращает зум в iOS */
-}
-
-/* Улучшение касаний на мобильных */
-button, input, .data-cell {
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-}
-</style>
-<style>
-.modal {
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.5);
+.export-buttons {
     display: flex;
-    align-items: center;
+    gap: 15px;
     justify-content: center;
-}
-
-.modal-content {
-    background: white;
-    padding: 30px;
-    border-radius: 20px;
-    max-width: 800px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-    position: relative;
-}
-
-.close {
-    position: absolute;
-    right: 20px;
-    top: 15px;
-    font-size: 28px;
-    cursor: pointer;
-}
-
-.subscription-plans {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 20px;
+    flex-wrap: wrap;
     margin-top: 20px;
 }
 
-.plan-card {
-    border: 2px solid #e2e8f0;
+.export-buttons button {
+    min-width: 180px;
+}
+
+.export-buttons button:first-child {
+    background: var(--success-color);
+}
+
+.export-buttons button:first-child:hover {
+    background: #0da271;
+}
+
+.export-buttons button:last-child {
+    background: var(--danger-color);
+}
+
+.export-buttons button:last-child:hover {
+    background: #dc2626;
+}
+
+/* Table Container */
+.table-container {
+    overflow-x: auto;
+    margin-bottom: 30px;
+    border: 1px solid var(--border-color);
     border-radius: 15px;
-    padding: 25px;
-    text-align: center;
+    background: var(--card-bg);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-.plan-card.premium {
-    border-color: #ffd700;
-    background: linear-gradient(135deg, #fff9e6, #fff0b3);
-}
-
-.plan-card h3 {
-    margin-bottom: 15px;
-    color: #2d3748;
-}
-
-.price {
-    font-size: 1.5rem;
-    font-weight: bold;
-    margin: 15px 0;
-    color: #4CAF50;
-}
-
-.plan-card ul {
-    list-style: none;
-    margin: 20px 0;
-    text-align: left;
-}
-
-.plan-card li {
-    padding: 8px 0;
-    font-size: 0.9rem;
-}
-
-.plan-btn {
+/* Table Styles */
+table {
     width: 100%;
-    padding: 15px;
-    border: none;
-    border-radius: 10px;
-    background: #4CAF50;
-    color: white;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    border-collapse: collapse;
+    min-width: 600px;
+    font-size: 14px;
 }
 
-.plan-btn.premium-btn {
-    background: #ff6b00;
+th, td {
+    border: 1px solid var(--border-color);
+    padding: 15px 12px;
+    text-align: left;
+    min-width: 120px;
+    max-width: 300px;
+    transition: all 0.2s ease;
+    vertical-align: top;
 }
 
-.plan-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-}
-
-.trial-banner {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: #ff6b00;
-    color: white;
-    padding: 15px 20px;
-    border-radius: 10px;
-    z-index: 999;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
-
-.trial-banner button {
-    background: white;
-    color: #ff6b00;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-@media (min-width: 768px) {
-    .subscription-plans {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-</style>
-/* Стили для изменения размера колонок */
-.table-header {
+th {
+    background: var(--bg-color);
+    font-weight: 600;
+    color: var(--text-primary);
+    position: relative;
     user-select: none;
 }
 
+td {
+    background: var(--card-bg);
+    position: relative;
+}
+
+td:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: -2px;
+    background: #f8faff;
+    z-index: 1;
+}
+/* Column Resizing */
 .col-header {
     position: relative;
-    padding-right: 12px;
+    padding-right: 16px;
 }
 
 .resize-handle {
     position: absolute;
     right: 0;
     top: 0;
-    width: 4px;
+    width: 6px;
     height: 100%;
-    background: #667eea;
+    background: var(--primary-color);
     cursor: col-resize;
     opacity: 0;
     transition: opacity 0.2s;
+    border-radius: 2px;
 }
 
-.resize-handle:hover {
+.resize-handle:hover,
+.resize-handle:active {
     opacity: 1;
 }
 
-th {
-    position: relative;
-    min-width: 80px;
-}
-
-/* Стили для ячеек с формулами */
+/* Formula Styles */
 .formula-cell {
     background: #fff3cd !important;
     font-style: italic;
+    font-weight: 500;
 }
 
 .formula-cell:focus {
     background: #ffeaa7 !important;
 }
 
-/* Улучшенные стили для таблицы */
+.formula-cell::before {
+    content: "ƒ";
+    position: absolute;
+    left: 4px;
+    top: 2px;
+    font-size: 10px;
+    color: var(--warning-color);
+    font-style: normal;
+}
+
+/* Table Interactions */
 table {
     table-layout: fixed;
 }
@@ -730,4 +260,142 @@ th, td {
 
 td {
     transition: background-color 0.2s;
+}
+
+td:hover {
+    background: #f8f9fa;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px 15px;
+        border-radius: 15px;
+    }
+    
+    header h1 {
+        font-size: 2em;
+    }
+    
+    .controls {
+        grid-template-columns: 1fr;
+        padding: 20px;
+    }
+    
+    .input-group input {
+        width: 100%;
+    }
+    
+    .export-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .export-buttons button {
+        width: 100%;
+        max-width: 280px;
+    }
+    
+    th, td {
+        padding: 10px 8px;
+        font-size: 13px;
+    }
+    
+    table {
+        min-width: 500px;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+    
+    header h1 {
+        font-size: 1.7em;
+    }
+    
+    header p {
+        font-size: 1em;
+    }
+    
+    .controls {
+        padding: 15px;
+    }
+    
+    button {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+}
+
+/* Scrollbar Styling */
+.table-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: var(--bg-color);
+    border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-hover);
+}
+
+/* Animation for table creation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+table {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Focus states for accessibility */
+button:focus,
+input:focus,
+td:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Loading state */
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* Success message */
+.success-message {
+    background: var(--success-color);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin: 10px 0;
+    text-align: center;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
