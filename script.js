@@ -30,7 +30,7 @@ function changeRows(delta) {
 function updateTableSize() {
     const columns = document.getElementById('columns').value;
     const rows = document.getElementById('rows').value;
-    document.getElementById('tableSize').textContent = ${columns}×${rows};
+    document.getElementById('tableSize').textContent = $(columns)×${rows};
 }
 
 // Обнови функцию createTable() для подсчета статистики
