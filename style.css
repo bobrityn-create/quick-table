@@ -676,3 +676,58 @@ button, input, .data-cell {
     }
 }
 </style>
+/* Стили для изменения размера колонок */
+.table-header {
+    user-select: none;
+}
+
+.col-header {
+    position: relative;
+    padding-right: 12px;
+}
+
+.resize-handle {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    background: #667eea;
+    cursor: col-resize;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.resize-handle:hover {
+    opacity: 1;
+}
+
+th {
+    position: relative;
+    min-width: 80px;
+}
+
+/* Стили для ячеек с формулами */
+.formula-cell {
+    background: #fff3cd !important;
+    font-style: italic;
+}
+
+.formula-cell:focus {
+    background: #ffeaa7 !important;
+}
+
+/* Улучшенные стили для таблицы */
+table {
+    table-layout: fixed;
+}
+
+th, td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+td {
+    transition: background-color 0.2s;
+}
